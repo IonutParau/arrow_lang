@@ -357,6 +357,22 @@ class ArrowParser {
         }
       }
 
+      if (segs.length > 1) {
+        if (segs[0].content == "global") {
+          final name = segs[1].content;
+          if (!isValidVariableName(name)) throw ArrowParsingFailure("Invalid global name", segs[1].file, segs[1].line);
+
+          if (segs.length == 2) {
+            return ArrowGlobalToken(name, parseSegments([segs[1]], false), vm, segs[0].file, segs[0].line);
+          }
+          if (segs.length > 3) {
+            if (segs[2].content == "=") {
+              return ArrowGlobalToken(name, parseSegments(segs.sublist(3), false), vm, segs[0].file, segs[0].line);
+            }
+          }
+        }
+      }
+
       if (segs.length == 2 || segs.length > 3) {
         if (segs[0].content == "let") {
           final varname = segs[1].content;
