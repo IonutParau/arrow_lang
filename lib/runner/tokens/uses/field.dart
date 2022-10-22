@@ -1,7 +1,7 @@
 part of arrow_tokens;
 
 class ArrowFieldToken extends ArrowToken {
-  String field;
+  ArrowToken field;
   ArrowToken host;
 
   ArrowFieldToken(this.field, this.host, super.vm, super.file, super.line);
@@ -15,7 +15,7 @@ class ArrowFieldToken extends ArrowToken {
   ArrowResource get(ArrowLocals locals, ArrowGlobals globals, ArrowStackTrace stackTrace) {
     stackTrace.push(ArrowStackTraceElement("Read field $name", file, line));
     final hostValue = host.get(locals, globals, stackTrace);
-    final value = hostValue.getField(field, stackTrace, file, line);
+    final value = hostValue.getField(field.get(locals, globals, stackTrace).string, stackTrace, file, line);
     stackTrace.pop();
     return value;
   }
@@ -32,7 +32,7 @@ class ArrowFieldToken extends ArrowToken {
   void set(ArrowLocals locals, ArrowGlobals globals, ArrowStackTrace stackTrace, ArrowResource other) {
     stackTrace.push(ArrowStackTraceElement("Write field $name", file, line));
     final hostValue = host.get(locals, globals, stackTrace);
-    hostValue.setField(field, other, stackTrace, file, line);
+    hostValue.setField(field.get(locals, globals, stackTrace).string, other, stackTrace, file, line);
     stackTrace.pop();
   }
 }

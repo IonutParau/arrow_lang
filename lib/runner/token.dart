@@ -269,6 +269,20 @@ class ArrowParser {
         return ArrowListToken(elements, vm, file, line);
       }
 
+      if (seg.content.contains('[') && seg.content.endsWith(']')) {
+        final i = lastIndex(seg.content, file, line, ['[']);
+        final host = parseSegments(splitLine(seg.content.substring(0, i), file, line), false);
+        final field = seg.content.substring(i + 1, seg.content.length - 1);
+
+        if (field == "") {
+          return ArrowFieldToken(ArrowNullToken(vm, file, line), host, vm, file, line);
+        }
+
+        final fieldToken = parseSegments(splitLine(field, file, line), false);
+
+        return ArrowFieldToken(fieldToken, host, vm, file, line);
+      }
+
       if (seg.content.startsWith('{') && seg.content.endsWith('}')) {
         if (topLevel) {
           final code = splitCode(seg.content.substring(1, seg.content.length - 1), file, line);
@@ -305,7 +319,7 @@ class ArrowParser {
             if (key.content.startsWith('(') && key.content.endsWith(')')) {
               map[parseSegments(splitLine(key.content.substring(1, key.content.length - 1), key.file, key.line), false)] = parseSegments(splitLine(value.content, value.file, value.line), false);
             } else {
-              if (!isValidVariableName(key.content)) {
+              if (!isValidFieldName(key.content)) {
                 throw ArrowParsingFailure("Forbidden field name. Either replace the field name witha raw expression (by wrapping it in parentheses) or make it like a variable name", file, line);
               }
               map[ArrowStringToken(key.content, vm, key.file, key.line)] = parseSegments(splitLine(value.content, value.file, value.line), false);
@@ -325,7 +339,11 @@ class ArrowParser {
         final field = parts.removeLast();
         final host = parts.map((e) => e.content).join(".");
 
-        return ArrowFieldToken(field.content, parseSegments(splitLine(host, file, line), false), vm, file, line);
+        if (!isValidFieldName(field.content)) {
+          throw ArrowParsingFailure("Forbidden field name", file, line);
+        }
+
+        return ArrowFieldToken(ArrowStringToken(field.content, vm, file, line), parseSegments(splitLine(host, file, line), false), vm, file, line);
       }
     } else {
       if (segs.length == 3) {
@@ -354,6 +372,12 @@ class ArrowParser {
         if (segs[0].content == "return") {
           final body = parseSegments([segs[1]], false);
           return ArrowReturnToken(body, vm, segs[0].file, segs[0].line);
+        }
+      }
+
+      if (segs.length == 1) {
+        if (segs[0].content == "return") {
+          return ArrowReturnToken(ArrowNullToken(vm, segs[0].file, segs[0].line), vm, segs[0].file, segs[0].line);
         }
       }
 
@@ -436,6 +460,21 @@ class ArrowParser {
     if (["null", "undefined", "blank", "empty", "unknown", "nothing", "none", "nil"].contains(name)) return false;
     if (["true", "false"].contains(name)) return false;
     if (["NaN", "Infinity"].contains(name)) return false;
+
+    return true;
+  }
+
+  bool isValidFieldName(String name) {
+    final chars = name.split("");
+
+    for (var char in chars) {
+      if (!variableAlphabet.contains(char)) {
+        return false;
+      }
+    }
+
+    if (num.tryParse(name) != null) return false;
+    if (name == "") return false;
 
     return true;
   }

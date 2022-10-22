@@ -152,7 +152,7 @@ class ArrowNumber extends ArrowResource {
     var s = number.toString();
 
     if (s.endsWith('.0')) {
-      s.replaceAll('.0', '');
+      return s.replaceAll('.0', '');
     }
 
     return s;
