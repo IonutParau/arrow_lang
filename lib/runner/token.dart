@@ -348,6 +348,15 @@ class ArrowParser {
         }
       }
 
+      if (segs.length > 3) {
+        if (segs[0].content == "export" && segs[2].content == "as") {
+          final val = parseSegments([segs[1]], false);
+          final key = parseSegments([segs[3]], false);
+
+          return ArrowExportToken(val, key, vm, segs[0].file, segs[0].line);
+        }
+      }
+
       if (segs.length == 2 || segs.length > 3) {
         if (segs[0].content == "let") {
           final varname = segs[1].content;

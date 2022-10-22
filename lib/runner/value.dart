@@ -24,6 +24,9 @@ abstract class ArrowResource {
   String get type;
 
   String get string;
+
+  @override
+  String toString() => string;
 }
 
 class ArrowGlobals {
