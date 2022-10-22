@@ -381,7 +381,7 @@ class ArrowParser {
         }
       }
 
-      if (segs.length > 3) {
+      if (segs.length == 4) {
         if (segs[0].content == "export" && segs[2].content == "as") {
           final val = parseSegments([segs[1]], false);
           final key = parseSegments([segs[3]], false);
