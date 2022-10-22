@@ -343,7 +343,6 @@ class ArrowParser {
       if (segs.length == 2) {
         if (segs[0].content == "return") {
           final body = parseSegments([segs[1]], false);
-          print(body);
           return ArrowReturnToken(body, vm, segs[0].file, segs[0].line);
         }
       }
