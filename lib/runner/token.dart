@@ -238,6 +238,16 @@ class ArrowParser {
         return ArrowNumberToken(num.parse(seg.content).toDouble(), vm, file, line);
       }
 
+      if (seg.content == "Infinity") {
+        return ArrowNumberToken(double.infinity, vm, file, line);
+      }
+      if (seg.content == "-Infinity") {
+        return ArrowNumberToken(double.negativeInfinity, vm, file, line);
+      }
+      if (seg.content == "NaN") {
+        return ArrowNumberToken(double.nan, vm, file, line);
+      }
+
       if (seg.content == "true" || seg.content == "false") {
         return ArrowBoolToken(seg.content == "true", vm, file, line);
       }

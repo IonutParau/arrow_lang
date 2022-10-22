@@ -3,7 +3,7 @@ part of arrow_types;
 class ArrowNumber extends ArrowResource {
   double number;
 
-  ArrowNumber(this.number);
+  ArrowNumber(num n) : number = n.toDouble();
 
   @override
   ArrowResource getField(String field, ArrowStackTrace stackTrace, String file, int line) {

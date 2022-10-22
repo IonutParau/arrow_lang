@@ -3,6 +3,8 @@ part of arrow_runner;
 const int arrowStackTraceLimit = 50;
 const int arrowStackOverflowLimit = 500;
 
+final rng = Random();
+
 class ArrowStackTraceElement {
   String name;
   String file;
@@ -87,6 +89,255 @@ class ArrowLibs {
     }
   }
 
+  void loadMath(ArrowLibMap map) {
+    final math = <String, ArrowResource>{};
+
+    math["sin"] = ArrowExternalFunction(((params, stackTrace) {
+      if (params.isEmpty) {
+        params = [ArrowNull()];
+      }
+      final n = params.first;
+
+      if (n is ArrowNumber) {
+        return ArrowNumber(sin(n.number));
+      }
+
+      return ArrowNull();
+    }));
+
+    math["cos"] = ArrowExternalFunction(((params, stackTrace) {
+      if (params.isEmpty) {
+        params = [ArrowNull()];
+      }
+      final n = params.first;
+
+      if (n is ArrowNumber) {
+        return ArrowNumber(cos(n.number));
+      }
+
+      return ArrowNull();
+    }));
+
+    math["tan"] = ArrowExternalFunction(((params, stackTrace) {
+      if (params.isEmpty) {
+        params = [ArrowNull()];
+      }
+      final n = params.first;
+
+      if (n is ArrowNumber) {
+        return ArrowNumber(tan(n.number));
+      }
+
+      return ArrowNull();
+    }));
+
+    math["asin"] = ArrowExternalFunction(((params, stackTrace) {
+      if (params.isEmpty) {
+        params = [ArrowNull()];
+      }
+      final n = params.first;
+
+      if (n is ArrowNumber) {
+        return ArrowNumber(asin(n.number));
+      }
+
+      return ArrowNull();
+    }));
+
+    math["floor"] = ArrowExternalFunction(((params, stackTrace) {
+      if (params.isEmpty) {
+        params = [ArrowNull()];
+      }
+      final n = params.first;
+
+      if (n is ArrowNumber) {
+        return ArrowNumber(n.number.toInt().toDouble());
+      }
+
+      return ArrowNull();
+    }));
+
+    math["maxfloat"] = ArrowNumber(double.maxFinite);
+
+    math["maxint"] = ArrowNumber(9223372036854775807);
+
+    math["pi"] = ArrowNumber(pi);
+    math["e"] = ArrowNumber(e);
+
+    math["abs"] = ArrowExternalFunction(((params, stackTrace) {
+      if (params.isEmpty) {
+        params = [ArrowNull()];
+      }
+      final n = params.first;
+
+      if (n is ArrowNumber) {
+        return ArrowNumber(n.number.abs());
+      }
+
+      return ArrowNull();
+    }));
+
+    math["atan2"] = ArrowExternalFunction(((params, stackTrace) {
+      while (params.length < 2) {
+        params = [...params, ArrowNumber(0)];
+      }
+
+      if ((params[0] is ArrowNumber) && (params[1] is ArrowNumber)) {
+        return ArrowNumber(atan2((params[0] as ArrowNumber).number, (params[1] as ArrowNumber).number));
+      }
+
+      return ArrowNull();
+    }));
+
+    math["exp"] = ArrowExternalFunction(((params, stackTrace) {
+      while (params.isEmpty) {
+        params = [...params, ArrowNumber(0)];
+      }
+
+      if ((params[0] is ArrowNumber)) {
+        return ArrowNumber(exp((params[0] as ArrowNumber).number));
+      }
+
+      return ArrowNull();
+    }));
+
+    math["atan2"] = ArrowExternalFunction(((params, stackTrace) {
+      while (params.length < 2) {
+        params = [...params, ArrowNumber(0)];
+      }
+
+      if ((params[0] is ArrowNumber) && (params[1] is ArrowNumber)) {
+        return ArrowNumber(atan2((params[0] as ArrowNumber).number, (params[1] as ArrowNumber).number));
+      }
+
+      return ArrowNull();
+    }));
+
+    math["atan"] = ArrowExternalFunction(((params, stackTrace) {
+      while (params.isEmpty) {
+        params = [...params, ArrowNumber(0)];
+      }
+
+      if ((params[0] is ArrowNumber)) {
+        return ArrowNumber(atan((params[0] as ArrowNumber).number));
+      }
+
+      return ArrowNull();
+    }));
+
+    math["ceil"] = ArrowExternalFunction(((params, stackTrace) {
+      while (params.isEmpty) {
+        params = [...params, ArrowNumber(0)];
+      }
+
+      if ((params[0] is ArrowNumber)) {
+        return ArrowNumber(((params[0] as ArrowNumber).number).ceil());
+      }
+
+      return ArrowNull();
+    }));
+
+    math["sqrt"] = ArrowExternalFunction(((params, stackTrace) {
+      while (params.isEmpty) {
+        params = [...params, ArrowNumber(0)];
+      }
+
+      if ((params[0] is ArrowNumber)) {
+        return ArrowNumber(sqrt((params[0] as ArrowNumber).number));
+      }
+
+      return ArrowNull();
+    }));
+
+    math["log"] = ArrowExternalFunction(((params, stackTrace) {
+      while (params.isEmpty) {
+        params = [...params, ArrowNumber(0)];
+      }
+
+      if ((params[0] is ArrowNumber)) {
+        return ArrowNumber(log((params[0] as ArrowNumber).number));
+      }
+
+      return ArrowNull();
+    }));
+
+    math["min"] = ArrowExternalFunction(((params, stackTrace) {
+      var number = double.infinity;
+
+      for (var param in params) {
+        if (param is ArrowNumber) {
+          if (param.number < number) {
+            number = param.number;
+          }
+        }
+      }
+
+      return ArrowNumber(number);
+    }));
+
+    math["max"] = ArrowExternalFunction(((params, stackTrace) {
+      var number = double.negativeInfinity;
+
+      for (var param in params) {
+        if (param is ArrowNumber) {
+          if (param.number > number) {
+            number = param.number;
+          }
+        }
+      }
+
+      return ArrowNumber(number);
+    }));
+
+    math["sinh"] = ArrowExternalFunction(((params, stackTrace) {
+      if (params.isEmpty) {
+        params = [ArrowNull()];
+      }
+      final n = params.first;
+
+      if (n is ArrowNumber) {
+        final num = n.number;
+        return ArrowNumber((pow(e, num) - pow(e, -num)) / 2);
+      }
+
+      return ArrowNull();
+    }));
+
+    math["cosh"] = ArrowExternalFunction(((params, stackTrace) {
+      if (params.isEmpty) {
+        params = [ArrowNull()];
+      }
+      final n = params.first;
+
+      if (n is ArrowNumber) {
+        final num = n.number;
+        return ArrowNumber((pow(e, num) + pow(e, -num)) / 2);
+      }
+
+      return ArrowNull();
+    }));
+
+    math["tanh"] = ArrowExternalFunction(((params, stackTrace) {
+      if (params.isEmpty) {
+        params = [ArrowNull()];
+      }
+      final n = params.first;
+
+      if (n is ArrowNumber) {
+        final num = n.number;
+        return ArrowNumber((pow(e, num) - pow(e, -num)) / (pow(e, num) + pow(e, -num)));
+      }
+
+      return ArrowNull();
+    }));
+
+    math["random"] = ArrowExternalFunction(((params, stackTrace) {
+      return ArrowNumber(rng.nextDouble());
+    }));
+
+    map["math"] = ArrowMap(math);
+  }
+
   void loadInternal(ArrowLibMap map) {
     map["import"] = ArrowExternalFunction((params, stackTrace) {
       if (params.isEmpty) {
@@ -121,6 +372,38 @@ class ArrowLibs {
 
       return ArrowNull();
     });
+
+    map["size"] = ArrowExternalFunction(((params, stackTrace) {
+      if (params.isEmpty) {
+        params = [ArrowNull()];
+      }
+
+      final value = params.first;
+
+      if (value is ArrowString) {
+        return ArrowNumber(value.str.length.toDouble());
+      }
+      if (value is ArrowBool) {
+        return ArrowNumber(1);
+      }
+      if (value is ArrowNumber) {
+        return ArrowNumber(value.number.toString().length.toDouble());
+      }
+      if (value is ArrowFunction) {
+        return ArrowNumber(value.params.length.toDouble());
+      }
+      if (value is ArrowExternalFunction) {
+        return ArrowNumber(0);
+      }
+      if (value is ArrowMap) {
+        return ArrowNumber(value.map.length.toDouble());
+      }
+      if (value is ArrowList) {
+        return ArrowNumber(value.elements.length.toDouble());
+      }
+
+      return ArrowNumber(0);
+    }));
   }
 
   void loadTerminal(ArrowLibMap map) {
