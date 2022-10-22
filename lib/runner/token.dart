@@ -388,7 +388,7 @@ class ArrowParser {
           if (!isValidVariableName(varname)) throw ArrowParsingFailure("Invalid variable name", segs[1].file, segs[1].line);
 
           if (segs.length == 2) {
-            return ArrowLetToken(varname, ArrowNullToken(vm, segs[0].file, segs[0].line), vm, segs[0].file, segs[0].line);
+            return ArrowLetToken(varname, ArrowNullToken(vm, segs[1].file, segs[1].line), vm, segs[0].file, segs[0].line);
           }
 
           if (segs.length > 3) {
@@ -403,7 +403,7 @@ class ArrowParser {
           final varname = parseSegments([segs[1]], false);
 
           if (segs.length == 2) {
-            return ArrowSetToken(varname, ArrowNullToken(vm, segs[0].file, segs[0].line), vm, segs[0].file, segs[0].line);
+            return ArrowSetToken(varname, ArrowNullToken(vm, segs[1].file, segs[1].line), vm, segs[0].file, segs[0].line);
           }
 
           if (segs.length > 3) {
