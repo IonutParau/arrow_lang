@@ -433,6 +433,9 @@ class ArrowParser {
 
     if (num.tryParse(name) != null) return false;
     if (name == "") return false;
+    if (["null", "undefined", "blank", "empty", "unknown", "nothing", "none", "nil"].contains(name)) return false;
+    if (["true", "false"].contains(name)) return false;
+    if (["NaN", "Infinity"].contains(name)) return false;
 
     return true;
   }
