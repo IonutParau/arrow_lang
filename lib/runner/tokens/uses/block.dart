@@ -7,7 +7,7 @@ class ArrowBlockToken extends ArrowToken {
 
   @override
   List<String> dependencies(List<String> toIgnore) {
-    final l = <String>[];
+    final l = <String>{};
     final ignore = [...toIgnore];
 
     for (var content in contents) {
@@ -17,7 +17,7 @@ class ArrowBlockToken extends ArrowToken {
       l.addAll(content.dependencies(ignore));
     }
 
-    return l;
+    return l.toList();
   }
 
   @override
