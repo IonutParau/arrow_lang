@@ -64,6 +64,60 @@ class ArrowString extends ArrowResource {
     if (field == "reversed") {
       return ArrowString(chars.reversed.join(""));
     }
+    if (field == "empty") {
+      return ArrowBool(str.isEmpty);
+    }
+    if (field == "contains") {
+      return ArrowExternalFunction(((params, stackTrace) {
+        if (params.isNotEmpty) {
+          return ArrowBool(str.contains(params[0].string));
+        }
+
+        return ArrowBool(false);
+      }));
+    }
+    if (field == "indexOf") {
+      return ArrowExternalFunction(((params, stackTrace) {
+        if (params.isNotEmpty) {
+          return ArrowNumber(str.indexOf(params[0].string));
+        }
+
+        return ArrowNumber(-1);
+      }));
+    }
+    if (field == "lastIndexOf") {
+      return ArrowExternalFunction(((params, stackTrace) {
+        if (params.isNotEmpty) {
+          return ArrowNumber(str.lastIndexOf(params[0].string));
+        }
+
+        return ArrowNumber(-1);
+      }));
+    }
+    if (field == "replaceAll") {
+      return ArrowExternalFunction(((params, stackTrace) {
+        while (params.length < 2) {
+          params = [...params, ArrowNull()];
+        }
+
+        return ArrowString(str.replaceAll(params[0].string, params[1].string));
+      }));
+    }
+    if (field == "replaceFirst") {
+      return ArrowExternalFunction(((params, stackTrace) {
+        while (params.length < 2) {
+          params = [...params, ArrowNull()];
+        }
+
+        return ArrowString(str.replaceFirst(params[0].string, params[1].string));
+      }));
+    }
+    if (field == "lower") {
+      return ArrowString(str.toLowerCase());
+    }
+    if (field == "upper") {
+      return ArrowString(str.toUpperCase());
+    }
     return ArrowNull();
   }
 
