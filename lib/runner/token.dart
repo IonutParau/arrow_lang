@@ -104,7 +104,7 @@ class ArrowParser {
 
       if (char == "\n") {
         line++;
-        if (list.last.content == "") {
+        if (list.last.content.replaceAll(" ", "").replaceAll("\t", "") == "") {
           list.last.line = line;
         }
       }

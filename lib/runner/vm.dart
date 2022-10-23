@@ -79,6 +79,8 @@ class ArrowLibs {
   void init() {
     addLib("terminal", loadTerminal);
     addLib("internal", loadInternal);
+    addLib("math", loadMath);
+    addLib("map", loadObject);
   }
 
   void load(List<String> libs) {
@@ -87,6 +89,87 @@ class ArrowLibs {
         map[lib]!(vm.globals._globals);
       }
     }
+  }
+
+  void loadObject(ArrowLibMap map) {
+    final object = <String, ArrowResource>{};
+
+    object["forEach"] = ArrowExternalFunction(((params, stackTrace) {
+      if (params[0] is ArrowMap) {
+        final m = params[0] as ArrowMap;
+
+        m.map.forEach((key, value) {
+          stackTrace.push(ArrowStackTraceElement("forEach:arg2", "arrow:internal", 0));
+          params[1].call([ArrowString(key), value], stackTrace, "arrow:internal", 0);
+          stackTrace.pop();
+        });
+      } else {
+        stackTrace.crash(ArrowStackTraceElement("Attempt to iterate ${params[0].type} using Map Iterator", "arrow:internal", 0));
+      }
+
+      return ArrowNull();
+    }), 2);
+
+    object["convertValue"] = ArrowExternalFunction(((params, stackTrace) {
+      if (params[0] is ArrowMap) {
+        final m = params[0] as ArrowMap;
+        final newM = <String, ArrowResource>{};
+
+        m.map.forEach((key, value) {
+          stackTrace.push(ArrowStackTraceElement("convertValue:arg2", "arrow:internal", 0));
+          final val = params[1].call([ArrowString(key), value], stackTrace, "arrow:internal", 0);
+          newM[key] = val;
+          stackTrace.pop();
+        });
+
+        return ArrowMap(newM);
+      } else {
+        stackTrace.crash(ArrowStackTraceElement("Attempt to iterate ${params[0].type} using Map Iterator", "arrow:internal", 0));
+      }
+
+      return ArrowNull();
+    }), 2);
+
+    object["convertKey"] = ArrowExternalFunction(((params, stackTrace) {
+      if (params[0] is ArrowMap) {
+        final m = params[0] as ArrowMap;
+        final newM = <String, ArrowResource>{};
+
+        m.map.forEach((key, value) {
+          stackTrace.push(ArrowStackTraceElement("convertKey:arg2", "arrow:internal", 0));
+          final k = params[1].call([ArrowString(key), value], stackTrace, "arrow:internal", 0);
+          newM[k.string] = value;
+          stackTrace.pop();
+        });
+
+        return ArrowMap(newM);
+      } else {
+        stackTrace.crash(ArrowStackTraceElement("Attempt to iterate ${params[0].type} using Map Iterator", "arrow:internal", 0));
+      }
+
+      return ArrowNull();
+    }), 2);
+
+    object["list"] = ArrowExternalFunction(((params, stackTrace) {
+      final l = <ArrowResource>[];
+
+      if (params[0] is ArrowMap) {
+        var i = 0;
+
+        while (true) {
+          final v = params[0].getField(i.toString(), stackTrace, "arrow:internal", 0);
+          if (v.type == "null") break;
+          l.add(v);
+          i++;
+        }
+      } else {
+        stackTrace.crash(ArrowStackTraceElement("Attempt to iterate ${params[0].type} using Map Iterator", "arrow:internal", 0));
+      }
+
+      return ArrowList(l);
+    }), 1);
+
+    map["map"] = ArrowMap(object);
   }
 
   void loadMath(ArrowLibMap map) {
@@ -404,6 +487,18 @@ class ArrowLibs {
 
       return ArrowNumber(0);
     }));
+
+    map["type"] = ArrowExternalFunction(((params, stackTrace) {
+      return ArrowString(params[0].string);
+    }), 1);
+
+    map["OS"] = ArrowString(Platform.operatingSystem);
+
+    map["OS_VER"] = ArrowString(Platform.operatingSystemVersion);
+
+    map["CORES"] = ArrowNumber(Platform.numberOfProcessors);
+
+    map["PATH_SEP"] = ArrowString(Platform.pathSeparator);
   }
 
   void loadTerminal(ArrowLibMap map) {
@@ -471,7 +566,7 @@ class ArrowVM {
     return run(file.readAsStringSync(), file.path);
   }
 
-  void loadLibs([List<String> libs = const ["terminal", "fs", "math", "internal"]]) {
+  void loadLibs([List<String> libs = const ["terminal", "fs", "math", "internal", "map"]]) {
     this.libs.load(libs);
   }
 }
