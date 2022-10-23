@@ -152,6 +152,9 @@ class ArrowList extends ArrowResource {
         return ArrowString(elements.join(params[0].string));
       }, 1);
     }
+    if (field == "copy") {
+      return ArrowList([...elements]);
+    }
 
     return ArrowNull();
   }

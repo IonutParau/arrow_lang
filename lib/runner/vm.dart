@@ -176,6 +176,14 @@ class ArrowLibs {
       return ArrowList(l);
     }), 1);
 
+    object["copy"] = ArrowExternalFunction((params, stackTrace) {
+      if (params[0] is ArrowMap) {
+        return ArrowMap({...(params[0] as ArrowMap).map});
+      }
+
+      return params[0];
+    }, 1);
+
     map["map"] = ArrowMap(object);
   }
 
