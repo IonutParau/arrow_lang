@@ -8,16 +8,22 @@ class ArrowNumber extends ArrowResource {
   @override
   ArrowResource getField(String field, ArrowStackTrace stackTrace, String file, int line) {
     if (field == "positive") {
-      return ArrowBool(number > 0);
+      return ArrowBool(!number.isNegative);
     }
     if (field == "negative") {
-      return ArrowBool(number < 0);
+      return ArrowBool(number.isNegative);
     }
     if (field == "infinite") {
-      return ArrowBool(number == double.infinity || number == double.negativeInfinity);
+      return ArrowBool(number.isInfinite);
+    }
+    if (field == "finite") {
+      return ArrowBool(number.isFinite);
     }
     if (field == "valid") {
-      return ArrowBool(number != double.nan);
+      return ArrowBool(!number.isNaN);
+    }
+    if (field == "invalid") {
+      return ArrowBool(number.isNaN);
     }
     if (field == "sign") {
       return ArrowNumber(number.sign);
