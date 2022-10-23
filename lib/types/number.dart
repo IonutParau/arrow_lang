@@ -19,6 +19,24 @@ class ArrowNumber extends ArrowResource {
     if (field == "valid") {
       return ArrowBool(number != double.nan);
     }
+    if (field == "sign") {
+      return ArrowNumber(number.sign);
+    }
+    if (field == "clamp") {
+      return ArrowExternalFunction((params, stackTrace) {
+        while (params.length < 2) {
+          params = [...params, ArrowNull()];
+        }
+        if (params[0] is ArrowNumber && params[1] is ArrowNumber) {
+          final n1 = params[0] as ArrowNumber;
+          final n2 = params[1] as ArrowNumber;
+
+          return ArrowNumber(number.clamp(n1.number, n2.number));
+        }
+
+        return ArrowNull();
+      });
+    }
     return ArrowNull();
   }
 
