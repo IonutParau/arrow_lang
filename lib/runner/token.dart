@@ -218,6 +218,16 @@ class ArrowParser {
       final file = seg.file;
       final line = seg.line;
 
+      if (seg.content.startsWith('!')) {
+        final val = parseSegments(splitLine(seg.content.substring(1), file, line), false);
+        return ArrowNotToken(val, vm, file, line);
+      }
+
+      if (seg.content.startsWith('-')) {
+        final val = parseSegments(splitLine(seg.content.substring(1), file, line), false);
+        return ArrowSubtractionToken(ArrowNumberToken(0, vm, file, line), val, vm, file, line);
+      }
+
       if (seg.content.startsWith('(') && seg.content.endsWith(')')) {
         final content = seg.content.substring(1, seg.content.length - 1);
         return parseSegments(splitLine(content, file, line), false);
@@ -243,9 +253,6 @@ class ArrowParser {
 
       if (seg.content == "Infinity") {
         return ArrowNumberToken(double.infinity, vm, file, line);
-      }
-      if (seg.content == "-Infinity") {
-        return ArrowNumberToken(double.negativeInfinity, vm, file, line);
       }
       if (seg.content == "NaN") {
         return ArrowNumberToken(double.nan, vm, file, line);

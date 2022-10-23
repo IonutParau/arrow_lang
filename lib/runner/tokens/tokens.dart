@@ -41,3 +41,4 @@ part 'logic/equal.dart';
 part 'logic/not_equal.dart';
 part 'logic/greater_equal.dart';
 part 'logic/less_equal.dart';
+part 'logic/not.dart';
