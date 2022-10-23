@@ -442,6 +442,155 @@ class ArrowParser {
           }
         }
       }
+
+      // Odd amount of segments might mean we're gonna do math and checking
+      if (segs.length % 2 == 1) {
+        final parts = <dynamic>[...segs];
+        var mutated = true;
+        var order = <List<String>>[
+          ["^"],
+          ["*", "/", "%"],
+          ["+", "-"],
+          ["==", "!=", ">", "<", ">=", "<="],
+          ["&&", "||"],
+        ];
+
+        while (mutated) {
+          mutated = false;
+
+          for (var ops in order) {
+            var i = parts.length - 1;
+            while (i >= 0) {
+              var op = parts[i];
+
+              if (op is ArrowParsedSegment) {
+                if (ops.contains(op.content)) {
+                  final li = i - 1;
+                  final ri = i + 1;
+
+                  if (li < 0) {
+                    throw ArrowParsingFailure("Nothing on the left of the ${op.content} operator!", op.file, op.line);
+                  }
+                  if (ri >= parts.length) {
+                    throw ArrowParsingFailure("Nothing on the right of the ${op.content} operator!", op.file, op.line);
+                  }
+                  final l = parts[li] is ArrowToken ? parts[li] as ArrowToken : parseSegments([parts[li]], false);
+                  final r = parts[ri] is ArrowToken ? parts[ri] as ArrowToken : parseSegments([parts[ri]], false);
+                  if (op.content == "^") {
+                    parts[li] = ArrowExpToken(l, r, vm, op.file, op.line);
+                    parts.removeAt(i);
+                    parts.removeAt(i);
+                    mutated = true;
+                    break;
+                  }
+                  if (op.content == "*") {
+                    parts[li] = ArrowMultiplyToken(l, r, vm, op.file, op.line);
+                    parts.removeAt(i);
+                    parts.removeAt(i);
+                    mutated = true;
+                    break;
+                  }
+                  if (op.content == "/") {
+                    parts[li] = ArrowDivideToken(l, r, vm, op.file, op.line);
+                    parts.removeAt(i);
+                    parts.removeAt(i);
+                    mutated = true;
+                    break;
+                  }
+                  if (op.content == "%") {
+                    parts[li] = ArrowModToken(l, r, vm, op.file, op.line);
+                    parts.removeAt(i);
+                    parts.removeAt(i);
+                    mutated = true;
+                    break;
+                  }
+                  if (op.content == "+") {
+                    print([li, i, ri]);
+                    parts[li] = ArrowAdditionToken(l, r, vm, op.file, op.line);
+                    parts.removeAt(i);
+                    parts.removeAt(i);
+                    mutated = true;
+                    break;
+                  }
+                  if (op.content == "-") {
+                    parts[li] = ArrowSubtractionToken(l, r, vm, op.file, op.line);
+                    parts.removeAt(i);
+                    parts.removeAt(i);
+                    mutated = true;
+                    break;
+                  }
+                  if (op.content == "&&") {
+                    parts[li] = ArrowAndToken(l, r, vm, op.file, op.line);
+                    parts.removeAt(i);
+                    parts.removeAt(i);
+                    mutated = true;
+                    break;
+                  }
+                  if (op.content == "||") {
+                    parts[li] = ArrowOrToken(l, r, vm, op.file, op.line);
+                    parts.removeAt(i);
+                    parts.removeAt(i);
+                    mutated = true;
+                    break;
+                  }
+                  if (op.content == ">") {
+                    parts[li] = ArrowGreaterToken(l, r, vm, op.file, op.line);
+                    parts.removeAt(i);
+                    parts.removeAt(i);
+                    mutated = true;
+                    break;
+                  }
+                  if (op.content == "<") {
+                    parts[li] = ArrowLessToken(l, r, vm, op.file, op.line);
+                    parts.removeAt(i);
+                    parts.removeAt(i);
+                    mutated = true;
+                    break;
+                  }
+                  if (op.content == ">=") {
+                    parts[li] = ArrowGreaterEqualToken(l, r, vm, op.file, op.line);
+                    parts.removeAt(i);
+                    parts.removeAt(i);
+                    mutated = true;
+                    break;
+                  }
+                  if (op.content == "<=") {
+                    parts[li] = ArrowLessEqualToken(l, r, vm, op.file, op.line);
+                    parts.removeAt(i);
+                    parts.removeAt(i);
+                    mutated = true;
+                    break;
+                  }
+                  if (op.content == "==") {
+                    parts[li] = ArrowEqualToken(l, r, vm, op.file, op.line);
+                    parts.removeAt(i);
+                    parts.removeAt(i);
+                    mutated = true;
+                    break;
+                  }
+                  if (op.content == "!=") {
+                    parts[li] = ArrowNotEqualToken(l, r, vm, op.file, op.line);
+                    parts.removeAt(i);
+                    parts.removeAt(i);
+                    mutated = true;
+                    break;
+                  }
+                }
+              }
+              i--;
+            }
+            if (mutated) break;
+          }
+
+          if (!mutated) break;
+        }
+
+        if (parts.length == 1) {
+          if (parts[0] is ArrowToken) {
+            return parts[0] as ArrowToken;
+          }
+        }
+      }
     }
 
     throw ArrowParsingFailure("Unknown syntax... did you make a typo?", segs[0].file, segs[0].line);

@@ -23,3 +23,21 @@ part 'uses/block.dart';
 part 'uses/return.dart';
 part 'uses/export.dart';
 part 'uses/global.dart';
+
+// Syntax for math
+part 'math/add.dart';
+part 'math/sub.dart';
+part 'math/multiply.dart';
+part 'math/divide.dart';
+part 'math/mod.dart';
+part 'math/exp.dart';
+
+// Syntax for logic
+part 'logic/and.dart';
+part 'logic/or.dart';
+part 'logic/greater.dart';
+part 'logic/less.dart';
+part 'logic/equal.dart';
+part 'logic/not_equal.dart';
+part 'logic/greater_equal.dart';
+part 'logic/less_equal.dart';
