@@ -14,6 +14,11 @@ class ArrowBlockToken extends ArrowToken {
       if (content is ArrowLetToken) {
         ignore.add(content.varname);
       }
+      if (content is ArrowDefineFunctionToken) {
+        if (content.varname is ArrowVariableToken) {
+          ignore.add((content.varname as ArrowVariableToken).varname);
+        }
+      }
       l.addAll(content.dependencies(ignore));
     }
 

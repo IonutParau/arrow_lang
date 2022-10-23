@@ -21,14 +21,21 @@ class ArrowStackTraceElement {
 class ArrowStackTrace {
   final List<ArrowStackTraceElement> stack = [];
 
+  /// Get the deepest the stack's ever been (occasionally useful if you want to know how close you've ever gotten to the stack limit)
+  int deepest = 0;
+
+  /// Current size of the stack trace
+  int get size => stack.length;
+
   ArrowVM vm;
 
   ArrowStackTrace(this.vm);
 
   void push(ArrowStackTraceElement element) {
     stack.add(element);
+    deepest = max(deepest, size);
     if (stack.length > arrowStackOverflowLimit) {
-      final error = ArrowStackTraceElement("Stack Trace Limit Exceeded (Depth is ${stack.length})", "arrow:internal", 0);
+      final error = ArrowStackTraceElement("Stack Trace Limit Exceeded (Depth is $size)", "arrow:internal", 0);
       stack.add(error);
       throw error;
     }
@@ -554,7 +561,9 @@ class ArrowVM {
 
     final codeTokens = codeSegs.map((e) => parser.parseSegments(parser.splitLine(e.content, e.file, e.line), true));
 
-    for (var token in codeTokens) {
+    final optimized = codeTokens.map((e) => e.optimized);
+
+    for (var token in optimized) {
       if (locals.has("")) break;
       token.run(locals, globals, stackTrace);
     }
