@@ -104,6 +104,9 @@ class ArrowParser {
 
       if (char == "\n") {
         line++;
+        if (list.last.content == "") {
+          list.last.line = line;
+        }
       }
 
       if (bracketDepth == 0 && seps.contains(char) && !inString) {
