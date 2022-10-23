@@ -378,9 +378,9 @@ class ArrowParser {
         }
       }
 
-      if (segs.length == 2) {
+      if (segs.length > 1) {
         if (segs[0].content == "return") {
-          final body = parseSegments([segs[1]], false);
+          final body = parseSegments(segs.sublist(1), false);
           return ArrowReturnToken(body, vm, segs[0].file, segs[0].line);
         }
       }
@@ -512,7 +512,6 @@ class ArrowParser {
                     break;
                   }
                   if (op.content == "+") {
-                    print([li, i, ri]);
                     parts[li] = ArrowAdditionToken(l, r, vm, op.file, op.line);
                     parts.removeAt(i);
                     parts.removeAt(i);

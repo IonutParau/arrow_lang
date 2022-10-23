@@ -116,8 +116,9 @@ class ArrowFunction extends ArrowResource {
 
 class ArrowExternalFunction extends ArrowResource {
   ArrowResource Function(List<ArrowResource> params, ArrowStackTrace stackTrace) func;
+  int minArgs;
 
-  ArrowExternalFunction(this.func);
+  ArrowExternalFunction(this.func, [this.minArgs = 0]);
 
   @override
   ArrowResource add(ArrowResource other, ArrowStackTrace stackTrace, String file, int line) {
@@ -127,6 +128,9 @@ class ArrowExternalFunction extends ArrowResource {
 
   @override
   ArrowResource call(List<ArrowResource> params, ArrowStackTrace stackTrace, String file, int line) {
+    while (params.length < minArgs) {
+      params = [...params, ArrowNull()];
+    }
     return func(params, stackTrace);
   }
 

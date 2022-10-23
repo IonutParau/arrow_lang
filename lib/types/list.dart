@@ -78,6 +78,80 @@ class ArrowList extends ArrowResource {
         return ArrowNull();
       });
     }
+    if (field == "insert") {
+      return ArrowExternalFunction((params, stackTrace) {
+        while (params.length < 2) {
+          params = [...params, ArrowNull()];
+        }
+
+        if (params[0] is ArrowNumber) {
+          elements.insert((params[0] as ArrowNumber).number.toInt(), params[1]);
+        }
+
+        return ArrowNull();
+      });
+    }
+    if (field == "contains") {
+      return ArrowExternalFunction((params, stackTrace) {
+        while (params.isNotEmpty) {
+          params = [...params, ArrowNull()];
+        }
+
+        for (var element in elements) {
+          if (element.equals(params[0])) return ArrowBool(true);
+        }
+
+        return ArrowBool(false);
+      });
+    }
+    if (field == "clear") {
+      return ArrowExternalFunction((params, stackTrace) {
+        elements.clear();
+
+        return ArrowNull();
+      });
+    }
+    if (field == "shuffle") {
+      return ArrowExternalFunction((params, stackTrace) {
+        elements.shuffle(rng);
+
+        return ArrowNull();
+      });
+    }
+    if (field == "forEach") {
+      return ArrowExternalFunction((params, stackTrace) {
+        for (var element in elements) {
+          stackTrace.push(ArrowStackTraceElement("forEach:arg1", file, line));
+          params[0].call([element], stackTrace, "arrow:internal", 0);
+          stackTrace.pop();
+        }
+
+        return ArrowNull();
+      }, 1);
+    }
+    if (field == "convert") {
+      return ArrowExternalFunction((params, stackTrace) {
+        final elements = <ArrowResource>[];
+
+        for (var element in this.elements) {
+          stackTrace.push(ArrowStackTraceElement("convert:arg1", file, line));
+          elements.add(params[0].call([element], stackTrace, "arrow:internal", 0));
+          stackTrace.pop();
+        }
+
+        return ArrowList(elements);
+      }, 1);
+    }
+    if (field == "map") {
+      return ArrowMap(elements.asMap().map((key, value) {
+        return MapEntry(key.toString(), value);
+      }));
+    }
+    if (field == "join") {
+      return ArrowExternalFunction((params, stackTrace) {
+        return ArrowString(elements.join(params[0].string));
+      }, 1);
+    }
 
     return ArrowNull();
   }
