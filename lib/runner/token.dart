@@ -399,7 +399,7 @@ class ArrowParser {
           if (!isValidVariableName(name)) throw ArrowParsingFailure("Invalid global name", segs[1].file, segs[1].line);
 
           if (segs.length == 2) {
-            return ArrowGlobalToken(name, parseSegments([segs[1]], false), vm, segs[0].file, segs[0].line);
+            return ArrowGlobalToken(name, ArrowVariableToken(name, vm, segs[1].file, segs[1].line), vm, segs[0].file, segs[0].line);
           }
           if (segs.length > 3) {
             if (segs[2].content == "=") {
