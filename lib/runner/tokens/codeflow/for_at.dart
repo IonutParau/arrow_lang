@@ -40,6 +40,7 @@ class ArrowForAtToken extends ArrowToken {
         locals.define(varname, element);
         stackTrace.push(ArrowStackTraceElement("For Loop Body", file, line));
         body.run(locals, globals, stackTrace);
+        if (locals.has("")) break;
         stackTrace.pop();
         locals.removeAmount(2);
         i++;
@@ -50,12 +51,17 @@ class ArrowForAtToken extends ArrowToken {
         locals.define(varname, value);
         stackTrace.push(ArrowStackTraceElement("For Loop Body", file, line));
         body.run(locals, globals, stackTrace);
+        if (locals.has("")) return;
         stackTrace.pop();
         locals.removeAmount(2);
       });
     } else {
       stackTrace.crash(ArrowStackTraceElement("Attempt to iterate value with no iterator", file, line));
     }
+
+    final returned = locals.getByName("");
+    locals.removeAmount(locals.size - size);
+    if (returned != null) locals.define("", returned);
 
     locals.removeAmount(locals.size - size);
   }

@@ -37,6 +37,7 @@ class ArrowForToken extends ArrowToken {
         locals.define(varname, element);
         stackTrace.push(ArrowStackTraceElement("For Loop Body", file, line));
         body.run(locals, globals, stackTrace);
+        if (locals.has("")) break;
         stackTrace.pop();
         locals.removeAmount(1);
       }
@@ -45,6 +46,7 @@ class ArrowForToken extends ArrowToken {
         locals.define(varname, value);
         stackTrace.push(ArrowStackTraceElement("For Loop Body", file, line));
         body.run(locals, globals, stackTrace);
+        if (locals.has("")) return;
         stackTrace.pop();
         locals.removeAmount(1);
       });
@@ -52,7 +54,9 @@ class ArrowForToken extends ArrowToken {
       stackTrace.crash(ArrowStackTraceElement("Attempt to iterate value with no iterator", file, line));
     }
 
+    final returned = locals.getByName("");
     locals.removeAmount(locals.size - size);
+    if (returned != null) locals.define("", returned);
   }
 
   @override
