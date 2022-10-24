@@ -1,5 +1,7 @@
 library arrow_tokens;
 
+import 'dart:math';
+
 import 'package:arrow_lang/types/types.dart';
 
 import '../runner.dart';

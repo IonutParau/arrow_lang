@@ -30,4 +30,7 @@ class ArrowGlobalToken extends ArrowToken {
   void set(ArrowLocals locals, ArrowGlobals globals, ArrowStackTrace stackTrace, ArrowResource other) {
     return;
   }
+
+  @override
+  ArrowToken get optimized => ArrowGlobalToken(globalName, value.optimized, vm, file, line);
 }

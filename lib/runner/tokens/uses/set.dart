@@ -32,4 +32,7 @@ class ArrowSetToken extends ArrowToken {
   void set(ArrowLocals locals, ArrowGlobals globals, ArrowStackTrace stackTrace, ArrowResource other) {
     run(locals, globals, stackTrace);
   }
+
+  @override
+  ArrowToken get optimized => ArrowSetToken(varname.optimized, value.optimized, vm, file, line);
 }

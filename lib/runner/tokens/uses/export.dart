@@ -32,4 +32,7 @@ class ArrowExportToken extends ArrowToken {
     get(locals, globals, stackTrace);
     toExport.set(locals, globals, stackTrace, other);
   }
+
+  @override
+  ArrowToken get optimized => ArrowExportToken(toExport.optimized, exportField.optimized, vm, file, line);
 }

@@ -8,7 +8,7 @@ class ArrowFieldToken extends ArrowToken {
 
   @override
   List<String> dependencies(List<String> toIgnore) {
-    return host.dependencies(toIgnore);
+    return {...host.dependencies(toIgnore), ...field.dependencies(toIgnore)}.toList();
   }
 
   @override
@@ -35,4 +35,7 @@ class ArrowFieldToken extends ArrowToken {
     hostValue.setField(field.get(locals, globals, stackTrace).string, other, stackTrace, file, line);
     stackTrace.pop();
   }
+
+  @override
+  ArrowToken get optimized => ArrowFieldToken(field.optimized, host.optimized, vm, file, line);
 }

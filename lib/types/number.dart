@@ -72,6 +72,9 @@ class ArrowNumber extends ArrowResource {
   @override
   ArrowResource divide(ArrowResource other, ArrowStackTrace stackTrace, String file, int line) {
     if (other is ArrowNumber) {
+      if (number == 0 && other.number == 0) {
+        return ArrowNumber(double.nan);
+      }
       if (other.number == 0) {
         return ArrowNumber(number.isNegative ? double.negativeInfinity : double.infinity);
       }
@@ -99,6 +102,7 @@ class ArrowNumber extends ArrowResource {
   @override
   ArrowResource mod(ArrowResource other, ArrowStackTrace stackTrace, String file, int line) {
     if (other is ArrowNumber) {
+      if (number == 0 && other.number == 0) return ArrowNumber(double.nan);
       if (other.number == 0) {
         return ArrowNumber(number.isNegative ? double.negativeInfinity : double.infinity);
       }

@@ -35,4 +35,21 @@ class ArrowDivideToken extends ArrowToken {
   void set(ArrowLocals locals, ArrowGlobals globals, ArrowStackTrace stackTrace, ArrowResource other) {
     get(locals, globals, stackTrace);
   }
+
+  @override
+  ArrowToken get optimized {
+    final oleft = left.optimized;
+    final oright = right.optimized;
+
+    if (oleft is ArrowNumberToken && oright is ArrowNumberToken) {
+      if (oleft.n == 0 && oright.n == 0) return ArrowNumberToken(double.nan, vm, file, line);
+      if (oright.n == 0) return ArrowNumberToken(oleft.n.isNegative ? double.negativeInfinity : double.infinity, vm, file, line);
+      if (oright.n == double.nan) return ArrowNumberToken(double.nan, vm, file, line);
+      if (oleft.n == double.nan) return ArrowNumberToken(double.nan, vm, file, line);
+
+      return ArrowNumberToken(oleft.n / oright.n, vm, file, line);
+    }
+
+    return ArrowAdditionToken(oleft, oright, vm, file, line);
+  }
 }

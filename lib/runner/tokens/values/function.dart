@@ -37,6 +37,9 @@ class ArrowDefineFunctionToken extends ArrowToken {
   void set(ArrowLocals locals, ArrowGlobals globals, ArrowStackTrace stackTrace, ArrowResource other) {
     return;
   }
+
+  @override
+  ArrowToken get optimized => ArrowDefineFunctionToken(varname, params, body.optimized, vm, file, line);
 }
 
 class ArrowAnonymousFunctionToken extends ArrowToken {

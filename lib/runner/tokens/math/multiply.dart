@@ -35,4 +35,16 @@ class ArrowMultiplyToken extends ArrowToken {
   void set(ArrowLocals locals, ArrowGlobals globals, ArrowStackTrace stackTrace, ArrowResource other) {
     get(locals, globals, stackTrace);
   }
+
+  @override
+  ArrowToken get optimized {
+    final oleft = left.optimized;
+    final oright = right.optimized;
+
+    if (oleft is ArrowNumberToken && oright is ArrowNumberToken) {
+      return ArrowNumberToken(oleft.n * oright.n, vm, file, line);
+    }
+
+    return ArrowAdditionToken(oleft, oright, vm, file, line);
+  }
 }

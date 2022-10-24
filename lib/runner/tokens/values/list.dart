@@ -33,4 +33,7 @@ class ArrowListToken extends ArrowToken {
   void set(ArrowLocals locals, ArrowGlobals globals, ArrowStackTrace stackTrace, ArrowResource other) {
     return;
   }
+
+  @override
+  ArrowToken get optimized => ArrowListToken(list.map((e) => e.optimized).toList(), vm, file, line);
 }

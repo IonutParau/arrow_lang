@@ -603,16 +603,11 @@ class ArrowVM {
   ArrowResource run(String code, String fileName) {
     final codeSegs = parser.splitCode(code, fileName, 0);
 
-    final codeTokens = codeSegs.map((e) => parser.parseSegments(parser.splitLine(e.content, e.file, e.line), true));
+    final codeTokens = codeSegs.map((e) => parser.parseSegments(parser.splitLine(e.content, e.file, e.line), true)).toList();
 
-    final optimized = codeTokens.map((e) => e.optimized);
+    final rootBlock = ArrowBlockToken(codeTokens, this, fileName, -1).optimized;
 
-    for (var token in optimized) {
-      if (locals.has("")) break;
-      token.run(locals, globals, stackTrace);
-    }
-
-    return locals.getByName("") ?? ArrowNull();
+    return rootBlock.get(locals, globals, stackTrace);
   }
 
   ArrowResource runFile(File file) {

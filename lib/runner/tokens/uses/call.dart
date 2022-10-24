@@ -33,4 +33,12 @@ class ArrowCallToken extends ArrowToken {
   void set(ArrowLocals locals, ArrowGlobals globals, ArrowStackTrace stackTrace, ArrowResource other) {
     return;
   }
+
+  @override
+  ArrowToken get optimized {
+    final oparams = params.map((e) => e.optimized).toList();
+    final ocall = toCall.optimized;
+
+    return ArrowCallToken(oparams, ocall, vm, file, line);
+  }
 }
