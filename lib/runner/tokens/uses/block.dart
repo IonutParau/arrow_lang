@@ -42,7 +42,13 @@ class ArrowBlockToken extends ArrowToken {
 
     for (var content in contents) {
       content.run(locals, globals, stackTrace);
-      if (locals.has("")) break;
+      if (locals.has("")) {
+        if (content is ArrowCallToken) {
+          locals.removeByName("");
+        } else {
+          break;
+        }
+      }
     }
     final value = locals.getByName("");
     locals.removeAmount(locals.size - size);

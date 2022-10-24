@@ -297,7 +297,13 @@ class ArrowParser {
         if (topLevel) {
           final code = splitCode(seg.content.substring(1, seg.content.length - 1), file, line);
 
-          return ArrowBlockToken(code.map((e) => parseSegments(splitLine(e.content, e.file, e.line), true)).toList(), vm, file, line);
+          return ArrowBlockToken(
+              code.map((e) {
+                return parseSegments(splitLine(e.content, e.file, e.line), true);
+              }).toList(),
+              vm,
+              file,
+              line);
         } else {
           final contents = seg.content.substring(1, seg.content.length - 1);
 

@@ -8,7 +8,13 @@ class ArrowCallToken extends ArrowToken {
 
   @override
   List<String> dependencies(List<String> toIgnore) {
-    return toCall.dependencies(toIgnore);
+    final pd = <String>{};
+
+    for (var param in params) {
+      pd.addAll(param.dependencies(toIgnore));
+    }
+
+    return {...toCall.dependencies(toIgnore), ...pd}.toList();
   }
 
   @override

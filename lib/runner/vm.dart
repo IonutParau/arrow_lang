@@ -35,7 +35,7 @@ class ArrowStackTrace {
     stack.add(element);
     deepest = max(deepest, size);
     if (stack.length > arrowStackOverflowLimit) {
-      final error = ArrowStackTraceElement("Stack Trace Limit Exceeded (Depth is $size)", "arrow:internal", 0);
+      final error = ArrowStackTraceElement("Stack Trace Limit Exceeded (Depth is $size)", element.file, element.line);
       stack.add(error);
       throw error;
     }
