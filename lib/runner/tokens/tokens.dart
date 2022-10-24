@@ -42,3 +42,10 @@ part 'logic/not_equal.dart';
 part 'logic/greater_equal.dart';
 part 'logic/less_equal.dart';
 part 'logic/not.dart';
+
+// Syntax for loops and ifs
+part 'codeflow/if.dart';
+part 'codeflow/if_else.dart';
+part 'codeflow/while.dart';
+part 'codeflow/for.dart';
+part 'codeflow/for_at.dart';

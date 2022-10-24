@@ -450,6 +450,64 @@ class ArrowParser {
         }
       }
 
+      if (segs.length == 2) {
+        if (segs[0].content.startsWith('if(') && segs[0].content.endsWith(')')) {
+          final i = segs[0].content.indexOf('(');
+          final name = segs[0].content.substring(i + 1, segs[0].content.length - 1);
+
+          final condition = parseSegments(splitLine(name, segs[0].file, segs[0].line), false);
+
+          final body = parseSegments([segs[1]], true);
+
+          return ArrowIfToken(condition, body, vm, segs[0].file, segs[0].line);
+        }
+      }
+
+      if (segs.length > 1) {
+        if (segs[0].content.startsWith('while(') && segs[0].content.endsWith(')')) {
+          final i = segs[0].content.indexOf('(');
+          final name = segs[0].content.substring(i + 1, segs[0].content.length - 1);
+
+          final condition = parseSegments(splitLine(name, segs[0].file, segs[0].line), false);
+
+          final body = parseSegments(segs.sublist(1), true);
+
+          return ArrowWhileToken(condition, body, vm, segs[0].file, segs[0].line);
+        }
+
+        if (segs[0].content.startsWith('for(') && segs[0].content.endsWith(')')) {
+          final i = segs[0].content.indexOf('(');
+          final name = segs[0].content.substring(i + 1, segs[0].content.length - 1);
+
+          final nameSegs = splitLine(name, segs[0].file, segs[0].line);
+          final body = parseSegments(segs.sublist(1), true);
+
+          if (nameSegs.length == 3 || nameSegs.length == 5) {
+            if (nameSegs.length == 3 && nameSegs[1].content == "in") {
+              return ArrowForToken(nameSegs[0].content, parseSegments([nameSegs[2]], false), body, vm, segs[0].file, segs[0].line);
+            }
+            if (nameSegs.length == 5 && nameSegs[1].content == "at" && nameSegs[3].content == "in") {
+              return ArrowForAtToken(nameSegs[0].content, nameSegs[2].content, parseSegments([nameSegs[4]], false), body, vm, segs[0].file, segs[0].line);
+            }
+          }
+        }
+      }
+
+      if (segs.length > 3) {
+        if (segs[0].content.startsWith('if(') && segs[0].content.endsWith(')') && segs[2].content == 'else') {
+          final i = segs[0].content.indexOf('(');
+          final name = segs[0].content.substring(i + 1, segs[0].content.length - 1);
+
+          final condition = parseSegments(splitLine(name, segs[0].file, segs[0].line), false);
+
+          final body = parseSegments([segs[1]], true);
+
+          final fallback = parseSegments(segs.sublist(3), true);
+
+          return ArrowIfElseToken(condition, body, fallback, vm, segs[0].file, segs[0].line);
+        }
+      }
+
       // Odd amount of segments might mean we're gonna do math and checking
       if (segs.length % 2 == 1) {
         final parts = <dynamic>[...segs];
