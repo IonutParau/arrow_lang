@@ -27,7 +27,7 @@ function test() {
 global test;
 
 // Set a variable (global or local)
-set name = name + 2
+name = name + 2
 
 // Define a global (set also defines if the global doesnt exist, but this one forcefully uses the global)
 global name = "Test"

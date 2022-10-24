@@ -433,20 +433,43 @@ class ArrowParser {
             }
           }
         }
-        if (segs[0].content == "set") {
-          final varname = parseSegments([segs[1]], false);
+      }
 
-          if (segs.length == 2) {
-            return ArrowSetToken(varname, ArrowNullToken(vm, segs[1].file, segs[1].line), vm, segs[0].file, segs[0].line);
-          }
-
-          if (segs.length > 3) {
-            if (segs[2].content == "=") {
-              final value = parseSegments(segs.sublist(3), false);
-
-              return ArrowSetToken(varname, value, vm, segs[0].file, segs[0].line);
-            }
-          }
+      if (segs.length > 2) {
+        if (segs[1].content == "=") {
+          final varname = parseSegments([segs[0]], false);
+          final value = parseSegments(segs.sublist(2), false);
+          return ArrowSetToken(varname, value, vm, segs[0].file, segs[0].line);
+        }
+        if (segs[1].content == "+=") {
+          final varname = parseSegments([segs[0]], false);
+          final value = parseSegments(segs.sublist(2), false);
+          return ArrowSetToken(varname, ArrowAdditionToken(varname, value, vm, segs[0].file, segs[0].line), vm, segs[0].file, segs[0].line);
+        }
+        if (segs[1].content == "-=") {
+          final varname = parseSegments([segs[0]], false);
+          final value = parseSegments(segs.sublist(2), false);
+          return ArrowSetToken(varname, ArrowSubtractionToken(varname, value, vm, segs[0].file, segs[0].line), vm, segs[0].file, segs[0].line);
+        }
+        if (segs[1].content == "*=") {
+          final varname = parseSegments([segs[0]], false);
+          final value = parseSegments(segs.sublist(2), false);
+          return ArrowSetToken(varname, ArrowMultiplyToken(varname, value, vm, segs[0].file, segs[0].line), vm, segs[0].file, segs[0].line);
+        }
+        if (segs[1].content == "/=") {
+          final varname = parseSegments([segs[0]], false);
+          final value = parseSegments(segs.sublist(2), false);
+          return ArrowSetToken(varname, ArrowDivideToken(varname, value, vm, segs[0].file, segs[0].line), vm, segs[0].file, segs[0].line);
+        }
+        if (segs[1].content == "%=") {
+          final varname = parseSegments([segs[0]], false);
+          final value = parseSegments(segs.sublist(2), false);
+          return ArrowSetToken(varname, ArrowModToken(varname, value, vm, segs[0].file, segs[0].line), vm, segs[0].file, segs[0].line);
+        }
+        if (segs[1].content == "^=") {
+          final varname = parseSegments([segs[0]], false);
+          final value = parseSegments(segs.sublist(2), false);
+          return ArrowSetToken(varname, ArrowExpToken(varname, value, vm, segs[0].file, segs[0].line), vm, segs[0].file, segs[0].line);
         }
       }
 

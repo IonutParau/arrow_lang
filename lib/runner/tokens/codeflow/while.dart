@@ -22,7 +22,7 @@ class ArrowWhileToken extends ArrowToken {
 
   @override
   void run(ArrowLocals locals, ArrowGlobals globals, ArrowStackTrace stackTrace) {
-    while (condition.get(locals, globals, stackTrace).truthy) {
+    while (condition.get(locals, globals, stackTrace).truthy && !locals.has("")) {
       body.run(locals, globals, stackTrace);
     }
   }
