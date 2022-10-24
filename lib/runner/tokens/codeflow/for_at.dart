@@ -64,4 +64,7 @@ class ArrowForAtToken extends ArrowToken {
   void set(ArrowLocals locals, ArrowGlobals globals, ArrowStackTrace stackTrace, ArrowResource other) {
     run(locals, globals, stackTrace);
   }
+
+  @override
+  ArrowToken get optimized => ArrowForAtToken(varname, atname, toIter.optimized, body.optimized, vm, file, line);
 }
