@@ -484,10 +484,20 @@ class ArrowParser {
 
           if (nameSegs.length == 3 || nameSegs.length == 5) {
             if (nameSegs.length == 3 && nameSegs[1].content == "in") {
-              return ArrowForToken(nameSegs[0].content, parseSegments([nameSegs[2]], false), body, vm, segs[0].file, segs[0].line);
+              final varname = nameSegs[0].content;
+
+              if (!isValidFieldName(varname)) throw ArrowParsingFailure("Invalid variable name for value store", nameSegs[0].file, nameSegs[0].line);
+
+              return ArrowForToken(varname, parseSegments([nameSegs[2]], false), body, vm, segs[0].file, segs[0].line);
             }
             if (nameSegs.length == 5 && nameSegs[1].content == "at" && nameSegs[3].content == "in") {
-              return ArrowForAtToken(nameSegs[0].content, nameSegs[2].content, parseSegments([nameSegs[4]], false), body, vm, segs[0].file, segs[0].line);
+              final varname = nameSegs[0].content;
+              final atname = nameSegs[2].content;
+
+              if (!isValidFieldName(varname)) throw ArrowParsingFailure("Invalid variable name for value store", nameSegs[0].file, nameSegs[0].line);
+              if (!isValidFieldName(atname)) throw ArrowParsingFailure("Invalid variable name for index store", nameSegs[2].file, nameSegs[2].line);
+
+              return ArrowForAtToken(varname, atname, parseSegments([nameSegs[4]], false), body, vm, segs[0].file, segs[0].line);
             }
           }
         }
