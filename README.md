@@ -27,7 +27,7 @@ function test() {
 global test;
 
 // Set a variable (global or local)
-name = name + 2
+name += 2
 
 // Define a global (set also defines if the global doesnt exist, but this one forcefully uses the global)
 global name = "Test"
@@ -51,7 +51,7 @@ void main() {
   vm.loadLibs();
 
   // Run a file
-  final result = vm.runFile(File("code.arrow"));
+  final result = vm.runFile(File("code.arw"));
 
   // Read a global from the VM
   print(vm.globals.get("Some global"));

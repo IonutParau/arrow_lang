@@ -1,0 +1,3 @@
+if(math.random() > 0.5) {
+  print("Test")
+}
