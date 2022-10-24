@@ -88,6 +88,7 @@ class ArrowLibs {
     addLib("internal", loadInternal);
     addLib("math", loadMath);
     addLib("map", loadObject);
+    addLib("helper", loadHelper);
   }
 
   void load(List<String> libs) {
@@ -96,6 +97,41 @@ class ArrowLibs {
         map[lib]!(vm.globals._globals);
       }
     }
+  }
+
+  void loadHelper(ArrowLibMap map) {
+    map["range"] = ArrowExternalFunction(((params, stackTrace) {
+      if (params[0] is ArrowNumber) {
+        final i = (params[0] as ArrowNumber).number.toInt();
+
+        final l = <ArrowResource>[];
+
+        for (var j = 0; j < i; j++) {
+          l.add(ArrowNumber(j));
+        }
+
+        return ArrowList(l);
+      }
+      return ArrowList([]);
+    }), 1);
+
+    map["default"] = ArrowExternalFunction((params, stackTrace) {
+      if (params[0].type == "null") {
+        return params[1];
+      }
+
+      return params[0];
+    }, 2);
+
+    map["assert"] = ArrowExternalFunction((params, stackTrace) {
+      if (params[0].truthy) {
+        return params[0];
+      }
+      if (params.length == 2) {
+        throw ArrowStackTraceElement(params[1].string, "arrow:helper", 0);
+      }
+      throw ArrowStackTraceElement("Assertion Failed", "arrow:helper", 0);
+    }, 1);
   }
 
   void loadObject(ArrowLibMap map) {
@@ -583,7 +619,7 @@ class ArrowVM {
     return run(file.readAsStringSync(), file.path);
   }
 
-  void loadLibs([List<String> libs = const ["terminal", "fs", "math", "internal", "map"]]) {
+  void loadLibs([List<String> libs = const ["terminal", "fs", "math", "internal", "map", "helper"]]) {
     this.libs.load(libs);
   }
 }
