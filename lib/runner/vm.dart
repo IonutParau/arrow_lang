@@ -479,7 +479,7 @@ class ArrowLibs {
         return ArrowNull();
       }
       if (params[0] is ArrowString) {
-        final file = File(params[0].string);
+        final file = File(params[0].string.split("/").join(Platform.pathSeparator));
         if (!file.existsSync()) {
           stackTrace.crash(ArrowStackTraceElement("File at \"${params[0].string}\" does not exist", "arrow:internal", 0));
           return ArrowNull();
