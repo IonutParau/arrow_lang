@@ -25,7 +25,22 @@ class ArrowMap extends ArrowResource {
 
   @override
   bool equals(ArrowResource other) {
-    return this == other;
+    if (other is ArrowMap) {
+      if (map.length != other.map.length) return false;
+
+      var eq = true;
+      map.forEach((key, value) {
+        if (other.map[key] == null) {
+          eq = false;
+        } else if (!value.equals(other.map[key] ?? ArrowNull())) {
+          eq = false;
+        }
+      });
+
+      return eq;
+    }
+
+    return false;
   }
 
   @override

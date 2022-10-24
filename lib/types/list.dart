@@ -24,7 +24,19 @@ class ArrowList extends ArrowResource {
 
   @override
   bool equals(ArrowResource other) {
-    return this == other;
+    if (other is ArrowList) {
+      if (other.elements.length != elements.length) return false;
+
+      for (var i = 0; i < elements.length; i++) {
+        if (!elements[i].equals(other.elements[i])) {
+          return false;
+        }
+      }
+
+      return true;
+    }
+
+    return false;
   }
 
   @override
