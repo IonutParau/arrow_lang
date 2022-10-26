@@ -16,6 +16,35 @@ abstract class ArrowToken {
   String get name;
 }
 
+class ArrowConstValToken extends ArrowToken {
+  ArrowResource res;
+
+  ArrowConstValToken(this.res, super.vm, super.file, super.line);
+
+  @override
+  List<String> dependencies(List<String> toIgnore) {
+    return [];
+  }
+
+  @override
+  ArrowResource get(ArrowLocals locals, ArrowGlobals globals, ArrowStackTrace stackTrace) {
+    return res;
+  }
+
+  @override
+  String get name => throw UnimplementedError();
+
+  @override
+  void run(ArrowLocals locals, ArrowGlobals globals, ArrowStackTrace stackTrace) {
+    return;
+  }
+
+  @override
+  void set(ArrowLocals locals, ArrowGlobals globals, ArrowStackTrace stackTrace, ArrowResource other) {
+    return;
+  }
+}
+
 class ArrowParsingFailure {
   String problem;
   String file;
@@ -419,6 +448,28 @@ class ArrowParser {
               return ArrowGlobalToken(name, parseSegments(segs.sublist(3), false), vm, segs[0].file, segs[0].line);
             }
           }
+        }
+      }
+
+      if (segs.length >= 3) {
+        if (segs[0].content == "class") {
+          final i = segs[1].content.indexOf('(');
+          var hasArgs = true;
+          if (i == -1) hasArgs = false;
+
+          final name = hasArgs ? segs[1].content.substring(0, i) : segs[1].content;
+          final params = hasArgs ? segs[1].content.substring(i + 1, segs[1].content.length - 1).split(',') : <String>[];
+
+          for (var i = 0; i < params.length; i++) {
+            while (params[i].startsWith(' ') || params[i].startsWith('\t')) {
+              params[i] = params[i].substring(1);
+            }
+          }
+
+          final varname = parseSegments(splitLine(name, segs[2].file, segs[2].line), false);
+          final body = parseSegments([segs[2]], true);
+
+          return ArrowClassToken(varname, params, body, vm, segs[0].file, segs[0].line);
         }
       }
 

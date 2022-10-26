@@ -21,7 +21,7 @@ class ArrowFieldToken extends ArrowToken {
   }
 
   @override
-  String get name => "${host.name}.$field";
+  String get name => "${host.name}.${field.name}";
 
   @override
   void run(ArrowLocals locals, ArrowGlobals globals, ArrowStackTrace stackTrace) {
@@ -32,7 +32,8 @@ class ArrowFieldToken extends ArrowToken {
   void set(ArrowLocals locals, ArrowGlobals globals, ArrowStackTrace stackTrace, ArrowResource other) {
     stackTrace.push(ArrowStackTraceElement("Write field $name", file, line));
     final hostValue = host.get(locals, globals, stackTrace);
-    hostValue.setField(field.get(locals, globals, stackTrace).string, other, stackTrace, file, line);
+    final fieldValue = field.get(locals, globals, stackTrace);
+    hostValue.setField(fieldValue.string, other, stackTrace, file, line);
     stackTrace.pop();
   }
 

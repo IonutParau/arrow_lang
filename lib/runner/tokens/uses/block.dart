@@ -19,6 +19,9 @@ class ArrowBlockToken extends ArrowToken {
           ignore.add((content.varname as ArrowVariableToken).varname);
         }
       }
+      if (content is ArrowConstValToken) {
+        continue; // Nobody needs a constant value at root lol
+      }
       l.addAll(content.dependencies(ignore));
     }
 

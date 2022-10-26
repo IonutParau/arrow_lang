@@ -1,0 +1,48 @@
+// Interpreter will turn this into a function definition
+class BaseClass {
+  this.field1 = 0;
+
+  function this.otherfunc(p1, p2) {
+    print([p1, p2])
+  }
+}
+
+// Same as
+function BaseClass() {
+  let this = {}
+
+  this.field1 = 0;
+
+  function this.otherfunc(p1, p2) {
+    print([p1, p2])
+  }
+  
+  return this
+}
+
+let thing = BaseClass()
+
+class OtherClass(arg1, arg2) {
+  this.field2 = [arg1, arg2];
+
+  // You can provide a function or map to inherit from
+  inherit(BaseClass);
+}
+
+// Classes are just functions, so we can pass them around as arguments
+// Since we can inherit from maps, we can inherit from dynamically created objects
+// or from already modified instances.
+class WithGenerics(type1) {
+  this.field1 = 0;
+  inherit(type1);
+}
+
+let withGenerics = WithGenerics(thing)
+
+let someInstance = BaseClass()
+someInstance.field1 = 50
+
+let withGenerics2 = WithGenerics(someInstance)
+
+// Prints 50
+print(withGenerics2.field1)

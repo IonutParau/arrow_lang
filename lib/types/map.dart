@@ -124,5 +124,5 @@ class ArrowMap extends ArrowResource {
   bool get truthy => map.isNotEmpty;
 
   @override
-  String get type => "map";
+  String get type => map["__type"] == null ? "map" : map["__type"]!.string;
 }

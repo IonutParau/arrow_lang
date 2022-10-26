@@ -479,10 +479,14 @@ class ArrowLibs {
         return ArrowNull();
       }
       if (params[0] is ArrowString) {
-        final file = File(params[0].string.split("/").join(Platform.pathSeparator));
+        final p = params[0].string.split("/").join(Platform.pathSeparator);
+        var file = File(p);
         if (!file.existsSync()) {
-          stackTrace.crash(ArrowStackTraceElement("File at \"${params[0].string}\" does not exist", "arrow:internal", 0));
-          return ArrowNull();
+          file = File('$p.arw');
+          if (!file.existsSync()) {
+            stackTrace.crash(ArrowStackTraceElement("File at \"${params[0].string}\" does not exist", "arrow:internal", 0));
+            return ArrowNull();
+          }
         }
         return vm.runFile(file);
       } else {
@@ -540,7 +544,7 @@ class ArrowLibs {
     }));
 
     map["type"] = ArrowExternalFunction(((params, stackTrace) {
-      return ArrowString(params[0].string);
+      return ArrowString(params[0].type);
     }), 1);
 
     map["OS"] = ArrowString(Platform.operatingSystem);

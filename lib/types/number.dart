@@ -58,7 +58,7 @@ class ArrowNumber extends ArrowResource {
   }
 
   @override
-  String get type => "null";
+  String get type => "number";
 
   @override
   ArrowResource add(ArrowResource other, ArrowStackTrace stackTrace, String file, int line) {
