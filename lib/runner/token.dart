@@ -262,7 +262,7 @@ class ArrowParser {
         return ArrowBoolToken(seg.content == "true", vm, file, line);
       }
 
-      if (["null", "undefined", "blank", "empty", "unknown", "nothing", "none", "nil"].contains(seg.content)) {
+      if (seg.content == "null") {
         return ArrowNullToken(vm, file, line);
       }
 
