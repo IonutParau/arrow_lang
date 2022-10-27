@@ -3,7 +3,7 @@ part of arrow_tokens;
 class ArrowBlockToken extends ArrowToken {
   List<ArrowToken> contents;
 
-  ArrowBlockToken(this.contents, super.vm, super.file, super.line);
+  ArrowBlockToken(this.contents, ArrowVM vm, String file, int line) : super(vm, file, line);
 
   @override
   List<String> dependencies(List<String> toIgnore) {
@@ -90,6 +90,24 @@ class ArrowBlockToken extends ArrowToken {
       }
       if (token is ArrowDefineFunctionToken) {
         final vname = token.varname;
+        if (vname is ArrowVariableToken) {
+          final name = vname.varname;
+          var useful = false;
+
+          for (var j = i + 1; j < contents.length; j++) {
+            final otherToken = contents[j];
+
+            if (otherToken.dependencies([]).contains(name)) {
+              useful = true;
+              break;
+            }
+          }
+
+          if (!useful) continue;
+        }
+      }
+      if (token is ArrowClassToken) {
+        final vname = token.classname;
         if (vname is ArrowVariableToken) {
           final name = vname.varname;
           var useful = false;

@@ -4,7 +4,7 @@ class ArrowSubtractionToken extends ArrowToken {
   ArrowToken left;
   ArrowToken right;
 
-  ArrowSubtractionToken(this.left, this.right, super.vm, super.file, super.line);
+  ArrowSubtractionToken(this.left, this.right, ArrowVM vm, String file, int line) : super(vm, file, line);
 
   @override
   List<String> dependencies(List<String> toIgnore) {

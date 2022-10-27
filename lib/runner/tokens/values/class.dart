@@ -85,7 +85,7 @@ class ArrowClassToken extends ArrowToken {
       vm,
       file,
       line,
-    );
+    ).optimized;
   }
 
   @override

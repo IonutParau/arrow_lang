@@ -5,7 +5,7 @@ class ArrowIfElseToken extends ArrowToken {
   ArrowToken body;
   ArrowToken fallback;
 
-  ArrowIfElseToken(this.condition, this.body, this.fallback, super.vm, super.file, super.line);
+  ArrowIfElseToken(this.condition, this.body, this.fallback, ArrowVM vm, String file, int line) : super(vm, file, line);
 
   @override
   List<String> dependencies(List<String> toIgnore) {

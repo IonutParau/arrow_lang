@@ -6,7 +6,7 @@ class ArrowForAtToken extends ArrowToken {
   ArrowToken toIter;
   ArrowToken body;
 
-  ArrowForAtToken(this.varname, this.atname, this.toIter, this.body, super.vm, super.file, super.line);
+  ArrowForAtToken(this.varname, this.atname, this.toIter, this.body, ArrowVM vm, String file, int line) : super(vm, file, line);
 
   @override
   List<String> dependencies(List<String> toIgnore) {

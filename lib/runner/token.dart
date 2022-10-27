@@ -19,7 +19,7 @@ abstract class ArrowToken {
 class ArrowConstValToken extends ArrowToken {
   ArrowResource res;
 
-  ArrowConstValToken(this.res, super.vm, super.file, super.line);
+  ArrowConstValToken(this.res, ArrowVM vm, String file, int line) : super(vm, file, line);
 
   @override
   List<String> dependencies(List<String> toIgnore) {

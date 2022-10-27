@@ -4,7 +4,7 @@ class ArrowFieldToken extends ArrowToken {
   ArrowToken field;
   ArrowToken host;
 
-  ArrowFieldToken(this.field, this.host, super.vm, super.file, super.line);
+  ArrowFieldToken(this.field, this.host, ArrowVM vm, String file, int line) : super(vm, file, line);
 
   @override
   List<String> dependencies(List<String> toIgnore) {
