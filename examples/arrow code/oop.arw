@@ -1,4 +1,4 @@
-// Interpreter will turn this into a function definition
+// Class body is function body in disguise with some boilerplate wrapped around it
 class BaseClass {
   this.field1 = 0;
 
@@ -25,7 +25,7 @@ let thing = BaseClass()
 class OtherClass(arg1, arg2) {
   this.field2 = [arg1, arg2];
 
-  // You can provide a function or map to inherit from
+  // You can provide a function, map or list of functions or maps to inherit from
   inherit(BaseClass);
 }
 
@@ -33,7 +33,7 @@ class OtherClass(arg1, arg2) {
 // Since we can inherit from maps, we can inherit from dynamically created objects
 // or from already modified instances.
 class WithGenerics(type1) {
-  this.field1 = 0;
+  this.field2 = 0;
   inherit(type1);
 }
 
