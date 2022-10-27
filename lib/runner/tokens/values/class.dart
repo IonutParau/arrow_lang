@@ -7,6 +7,28 @@ class ArrowClassToken extends ArrowToken {
 
   ArrowClassToken(this.classname, this.params, this.body, ArrowVM vm, String file, int line) : super(vm, file, line);
 
+  void handleInherit(ArrowResource superClass, ArrowStackTrace stackTrace, ArrowMap instance) {
+    if (superClass is ArrowMap) {
+      superClass.map.forEach((key, value) {
+        if (key != "__type") {
+          instance.map[key] = value;
+        }
+      });
+    }
+    if (superClass is ArrowList) {
+      for (var superClassElement in superClass.elements) {
+        stackTrace.push(ArrowStackTraceElement("inherit()", "arrow:internal", 0));
+        handleInherit(superClassElement, stackTrace, instance);
+        stackTrace.pop();
+      }
+    }
+    if (superClass is ArrowFunction) {
+      stackTrace.push(ArrowStackTraceElement("inherit()", "arrow:internal", 0));
+      handleInherit(superClass.call([], stackTrace, file, line), stackTrace, instance);
+      stackTrace.pop();
+    }
+  }
+
   ArrowToken classBody(ArrowLocals locals) {
     // Class body is just normal body but with some boilerplate wrapped around it (invisible code)
     return ArrowBlockToken(
@@ -29,57 +51,11 @@ class ArrowClassToken extends ArrowToken {
             ArrowExternalFunction((params, stackTrace) {
               final superClass = params.first;
 
-              if (superClass is ArrowMap) {
-                final instance = locals.getByName("this");
-                if (instance != null) {
-                  if (instance is ArrowMap) {
-                    superClass.map.forEach((key, value) {
-                      if (key != "__type") instance.map[key] = value;
-                    });
-                  }
-                }
-              }
-              if (superClass is ArrowList) {
-                final instance = locals.getByName("this");
-                if (instance != null) {
-                  if (instance is ArrowMap) {
-                    for (var value in superClass.elements) {
-                      if (value is ArrowMap) {
-                        value.map.forEach((key, value) {
-                          if (key != "__type") instance.map[key] = value;
-                        });
-                      }
-                    }
-                  }
-                }
-              }
+              final instance = locals.getByName("this");
 
-              if (superClass is ArrowFunction) {
-                final superClassReturn = superClass.call([], stackTrace, file, line);
-
-                if (superClassReturn is ArrowMap) {
-                  final instance = locals.getByName("this");
-                  if (instance != null) {
-                    if (instance is ArrowMap) {
-                      superClassReturn.map.forEach((key, value) {
-                        if (key != "__type") instance.map[key] = value;
-                      });
-                    }
-                  }
-                }
-                if (superClassReturn is ArrowList) {
-                  final instance = locals.getByName("this");
-                  if (instance != null) {
-                    if (instance is ArrowMap) {
-                      for (var value in superClassReturn.elements) {
-                        if (value is ArrowMap) {
-                          value.map.forEach((key, value) {
-                            if (key != "__type") instance.map[key] = value;
-                          });
-                        }
-                      }
-                    }
-                  }
+              if (instance != null) {
+                if (instance is ArrowMap) {
+                  handleInherit(superClass, stackTrace, instance);
                 }
               }
 
