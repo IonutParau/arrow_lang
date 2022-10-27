@@ -39,6 +39,20 @@ class ArrowClassToken extends ArrowToken {
                   }
                 }
               }
+              if (superClass is ArrowList) {
+                final instance = locals.getByName("this");
+                if (instance != null) {
+                  if (instance is ArrowMap) {
+                    for (var value in superClass.elements) {
+                      if (value is ArrowMap) {
+                        value.map.forEach((key, value) {
+                          if (key != "__type") instance.map[key] = value;
+                        });
+                      }
+                    }
+                  }
+                }
+              }
 
               if (superClass is ArrowFunction) {
                 final superClassReturn = superClass.call([], stackTrace, file, line);
@@ -50,6 +64,20 @@ class ArrowClassToken extends ArrowToken {
                       superClassReturn.map.forEach((key, value) {
                         if (key != "__type") instance.map[key] = value;
                       });
+                    }
+                  }
+                }
+                if (superClassReturn is ArrowList) {
+                  final instance = locals.getByName("this");
+                  if (instance != null) {
+                    if (instance is ArrowMap) {
+                      for (var value in superClassReturn.elements) {
+                        if (value is ArrowMap) {
+                          value.map.forEach((key, value) {
+                            if (key != "__type") instance.map[key] = value;
+                          });
+                        }
+                      }
                     }
                   }
                 }

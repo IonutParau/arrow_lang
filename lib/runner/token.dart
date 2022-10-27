@@ -466,8 +466,30 @@ class ArrowParser {
             }
           }
 
-          final varname = parseSegments(splitLine(name, segs[2].file, segs[2].line), false);
-          final body = parseSegments([segs[2]], true);
+          final varname = parseSegments(splitLine(name, segs[1].file, segs[1].line), false);
+          if (segs[2].content == "extends" && segs.length >= 5) {
+            final toInherit = parseSegments([segs[3]], false);
+            final body = parseSegments(segs.sublist(4), true);
+
+            return ArrowClassToken(
+                varname,
+                params,
+                ArrowBlockToken([
+                  ArrowCallToken(
+                    [toInherit],
+                    ArrowVariableToken("inherit", vm, body.file, body.line),
+                    vm,
+                    body.file,
+                    body.line,
+                  ),
+                  body,
+                ], vm, body.file, body.line),
+                vm,
+                segs[0].file,
+                segs[0].line);
+          }
+
+          final body = parseSegments(segs.sublist(2), true);
 
           return ArrowClassToken(varname, params, body, vm, segs[0].file, segs[0].line);
         }
