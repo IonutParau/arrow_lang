@@ -2,6 +2,7 @@ part of arrow_runner;
 
 const int arrowStackTraceLimit = 50;
 const int arrowStackOverflowLimit = 500;
+const String arrowVersion = "0.0.1";
 
 final rng = Random();
 
@@ -89,6 +90,7 @@ class ArrowLibs {
     addLib("math", loadMath);
     addLib("map", loadObject);
     addLib("helper", loadHelper);
+    addLib("fs", loadFS);
   }
 
   void load(List<String> libs) {
@@ -97,6 +99,83 @@ class ArrowLibs {
         map[lib]!(vm.globals._globals);
       }
     }
+  }
+
+  void loadFS(ArrowLibMap map) {
+    final fs = <String, ArrowResource>{};
+
+    fs["fileExists"] = ArrowExternalFunction((params, stackTrace) {
+      final path = params[0];
+
+      if (path is ArrowString) {
+        return ArrowBool(File(path.str).existsSync());
+      }
+
+      return ArrowBool(false);
+    }, 1);
+
+    fs["dirExists"] = ArrowExternalFunction((params, stackTrace) {
+      final path = params[0];
+
+      if (path is ArrowString) {
+        return ArrowBool(Directory(path.str).existsSync());
+      }
+
+      return ArrowBool(false);
+    }, 1);
+
+    fs["readFile"] = ArrowExternalFunction((params, stackTrace) {
+      final path = params[0];
+
+      if (path is ArrowString) {
+        final f = File(path.str);
+
+        if (f.existsSync()) {
+          return ArrowString(f.readAsStringSync());
+        }
+      }
+
+      return ArrowNull();
+    }, 1);
+
+    fs["writeFile"] = ArrowExternalFunction((params, stackTrace) {
+      final path = params[0];
+      final content = params[1];
+
+      if (path is ArrowString) {
+        final f = File(path.str);
+
+        if (!f.existsSync()) f.createSync(recursive: true);
+        f.writeAsStringSync(content.string);
+      }
+
+      return ArrowNull();
+    }, 2);
+
+    fs["listDirItems"] = ArrowExternalFunction((params, stackTrace) {
+      final path = params[0];
+
+      if (path is ArrowString) {
+        final dir = Directory(path.str);
+        if (dir.existsSync()) {
+          final l = <ArrowResource>[];
+
+          for (var fse in dir.listSync()) {
+            if (fse is File) {
+              l.add(ArrowMap({"type": ArrowString("file"), "path": ArrowString(fse.path)}));
+            } else if (fse is Directory) {
+              l.add(ArrowMap({"type": ArrowString("directory"), "path": ArrowString(fse.path)}));
+            }
+          }
+
+          return ArrowList(l);
+        }
+      }
+
+      return ArrowList([]);
+    }, 2);
+
+    map["fs"] = ArrowMap(fs);
   }
 
   void loadHelper(ArrowLibMap map) {
@@ -547,6 +626,39 @@ class ArrowLibs {
       return ArrowString(params[0].type);
     }), 1);
 
+    map["truetype"] = ArrowExternalFunction(((params, stackTrace) {
+      final obj = params.first;
+
+      var type = obj.type;
+
+      if (obj is ArrowString) {
+        type = "string";
+      }
+      if (obj is ArrowNumber) {
+        type = "number";
+      }
+      if (obj is ArrowNull) {
+        type = "null";
+      }
+      if (obj is ArrowBool) {
+        type = "bool";
+      }
+      if (obj is ArrowFunction) {
+        type = "function";
+      }
+      if (obj is ArrowExternalFunction) {
+        type = "dart_function";
+      }
+      if (obj is ArrowMap) {
+        type = "map";
+      }
+      if (obj is ArrowList) {
+        type = "list";
+      }
+
+      return ArrowString(type);
+    }), 1);
+
     map["OS"] = ArrowString(Platform.operatingSystem);
 
     map["OS_VER"] = ArrowString(Platform.operatingSystemVersion);
@@ -554,6 +666,8 @@ class ArrowLibs {
     map["CORES"] = ArrowNumber(Platform.numberOfProcessors);
 
     map["PATH_SEP"] = ArrowString(Platform.pathSeparator);
+
+    map["ARROW_VER"] = ArrowString(arrowVersion);
   }
 
   void loadTerminal(ArrowLibMap map) {
