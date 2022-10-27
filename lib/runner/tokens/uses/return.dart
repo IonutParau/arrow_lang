@@ -3,7 +3,7 @@ part of arrow_tokens;
 class ArrowReturnToken extends ArrowToken {
   ArrowToken val;
 
-  ArrowReturnToken(this.val, super.vm, super.file, super.line);
+  ArrowReturnToken(this.val, ArrowVM vm, String file, int line) : super(vm, file, line);
 
   @override
   List<String> dependencies(List<String> toIgnore) {

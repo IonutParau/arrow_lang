@@ -3,7 +3,7 @@ part of arrow_tokens;
 class ArrowVariableToken extends ArrowToken {
   String varname;
 
-  ArrowVariableToken(this.varname, super.vm, super.file, super.line);
+  ArrowVariableToken(this.varname, ArrowVM vm, String file, int line) : super(vm, file, line);
 
   @override
   List<String> dependencies(List<String> toIgnore) {

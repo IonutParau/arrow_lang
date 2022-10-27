@@ -3,7 +3,7 @@ part of arrow_tokens;
 class ArrowNotToken extends ArrowToken {
   ArrowToken val;
 
-  ArrowNotToken(this.val, super.vm, super.file, super.line);
+  ArrowNotToken(this.val, ArrowVM vm, String file, int line) : super(vm, file, line);
 
   @override
   List<String> dependencies(List<String> toIgnore) {

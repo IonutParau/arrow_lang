@@ -4,7 +4,7 @@ class ArrowLetToken extends ArrowToken {
   String varname;
   ArrowToken value;
 
-  ArrowLetToken(this.varname, this.value, super.vm, super.file, super.line);
+  ArrowLetToken(this.varname, this.value, ArrowVM vm, String file, int line) : super(vm, file, line);
 
   @override
   List<String> dependencies(List<String> toIgnore) {

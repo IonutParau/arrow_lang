@@ -4,7 +4,7 @@ class ArrowWhileToken extends ArrowToken {
   ArrowToken condition;
   ArrowToken body;
 
-  ArrowWhileToken(this.condition, this.body, super.vm, super.file, super.line);
+  ArrowWhileToken(this.condition, this.body, ArrowVM vm, String file, int line) : super(vm, file, line);
 
   @override
   List<String> dependencies(List<String> toIgnore) {

@@ -4,7 +4,7 @@ class ArrowGlobalToken extends ArrowToken {
   String globalName;
   ArrowToken value;
 
-  ArrowGlobalToken(this.globalName, this.value, super.vm, super.file, super.line);
+  ArrowGlobalToken(this.globalName, this.value, ArrowVM vm, String file, int line) : super(vm, file, line);
 
   @override
   List<String> dependencies(List<String> toIgnore) {
