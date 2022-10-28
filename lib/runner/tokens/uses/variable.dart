@@ -33,7 +33,7 @@ class ArrowVariableToken extends ArrowToken {
 
   @override
   void set(ArrowLocals locals, ArrowGlobals globals, ArrowStackTrace stackTrace, ArrowResource other) {
-    if (locals.setByName(varname, other)) {
+    if (!locals.setByName(varname, other)) {
       globals.set(varname, other);
     }
   }
