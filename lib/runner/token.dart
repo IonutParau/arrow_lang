@@ -232,13 +232,24 @@ class ArrowParser {
   }
 
   List<ArrowParsedSegment> splitLine(String line, String file, int lineOffset) {
-    while (line.startsWith(' ') || line.startsWith('\t')) {
-      line = line.substring(1);
+    if (line != "") {
+      while (line.startsWith(' ') || line.startsWith('\t') || line.startsWith('\n')) {
+        line = line.substring(1);
+      }
     }
-    while (line.endsWith(' ') || line.endsWith('\t')) {
-      line = line.substring(line.length - 1);
+    if (line != "") {
+      while (line.endsWith(' ') || line.endsWith('\t') || line.endsWith('\n')) {
+        line = (line.split('')..removeLast()).join();
+      }
     }
-    return splitToSegs(line, file, lineOffset, ["\t", " "]);
+
+    if (line == "") return [ArrowParsedSegment("", file, lineOffset)];
+
+    final s = splitToSegs(line, file, lineOffset, ["\t", " "]);
+
+    s.removeWhere((element) => element.content.replaceAll('\t', '').replaceAll(' ', '') == '');
+
+    return s;
   }
 
   ArrowToken parseSegments(List<ArrowParsedSegment> segs, bool topLevel) {
@@ -300,6 +311,7 @@ class ArrowParser {
       }
 
       if (seg.content.startsWith('[') && seg.content.endsWith(']')) {
+        if (seg.content.replaceAll('\t', '').replaceAll(' ', '') == "[]") return ArrowListToken([], vm, file, line);
         final contents = seg.content.substring(1, seg.content.length - 1);
         final contentSegs = splitToSegs(contents, file, line, [',']);
 
@@ -327,14 +339,19 @@ class ArrowParser {
           final code = splitCode(seg.content.substring(1, seg.content.length - 1), file, line);
 
           return ArrowBlockToken(
-              code.map((e) {
-                return parseSegments(splitLine(e.content, e.file, e.line), true);
-              }).toList(),
-              vm,
-              file,
-              line);
+            code.map((e) {
+              final s = parseSegments(splitLine(e.content, e.file, e.line), true);
+              return s;
+            }).toList(),
+            vm,
+            file,
+            line,
+          );
         } else {
           final contents = seg.content.substring(1, seg.content.length - 1);
+          if (contents.replaceAll('\n', '').replaceAll('\t', '').replaceAll(' ', '') == "") {
+            return ArrowMapToken({}, vm, file, line);
+          }
 
           final contentsSegments = splitToSegs(contents, file, line, [',']);
 
@@ -343,7 +360,7 @@ class ArrowParser {
               content.content = content.content.substring(1);
             }
             while (content.content.endsWith(' ') || content.content.endsWith('\t')) {
-              content.content = content.content.substring(content.content.length - 1);
+              content.content = (content.content.split('')..removeLast()).join();
             }
           }
 
@@ -578,8 +595,7 @@ class ArrowParser {
         }
 
         if (segs[0].content.startsWith('for(') && segs[0].content.endsWith(')')) {
-          final i = segs[0].content.indexOf('(');
-          final name = segs[0].content.substring(i + 1, segs[0].content.length - 1);
+          final name = segs[0].content.substring(4, segs[0].content.length - 1);
 
           final nameSegs = splitLine(name, segs[0].file, segs[0].line);
           final body = parseSegments(segs.sublist(1), true);
@@ -588,7 +604,7 @@ class ArrowParser {
             if (nameSegs.length == 3 && nameSegs[1].content == "in") {
               final varname = nameSegs[0].content;
 
-              if (!isValidFieldName(varname)) throw ArrowParsingFailure("Invalid variable name for value store", nameSegs[0].file, nameSegs[0].line);
+              if (!isValidVariableName(varname)) throw ArrowParsingFailure("Invalid variable name for value store", nameSegs[0].file, nameSegs[0].line);
 
               return ArrowForToken(varname, parseSegments([nameSegs[2]], false), body, vm, segs[0].file, segs[0].line);
             }
@@ -596,8 +612,8 @@ class ArrowParser {
               final varname = nameSegs[0].content;
               final atname = nameSegs[2].content;
 
-              if (!isValidFieldName(varname)) throw ArrowParsingFailure("Invalid variable name for value store", nameSegs[0].file, nameSegs[0].line);
-              if (!isValidFieldName(atname)) throw ArrowParsingFailure("Invalid variable name for index store", nameSegs[2].file, nameSegs[2].line);
+              if (!isValidVariableName(varname)) throw ArrowParsingFailure("Invalid variable name for value store", nameSegs[0].file, nameSegs[0].line);
+              if (!isValidVariableName(atname)) throw ArrowParsingFailure("Invalid variable name for index store", nameSegs[2].file, nameSegs[2].line);
 
               return ArrowForAtToken(varname, atname, parseSegments([nameSegs[4]], false), body, vm, segs[0].file, segs[0].line);
             }
