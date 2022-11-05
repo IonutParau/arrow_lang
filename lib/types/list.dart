@@ -279,7 +279,7 @@ class ArrowList extends ArrowResource {
     }
 
     if (shape is ArrowString) {
-      return shape.str == "list";
+      return shape.str == "list" || shape.str == "any";
     }
 
     return false;

@@ -230,7 +230,7 @@ class ArrowExternalFunction extends ArrowResource {
   @override
   bool matchesShape(ArrowResource shape) {
     if (shape is ArrowString) {
-      return shape.str == "function";
+      return shape.str == "function" || shape.str == "any";
     }
     return false;
   }

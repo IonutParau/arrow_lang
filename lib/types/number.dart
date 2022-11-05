@@ -202,7 +202,7 @@ class ArrowNumber extends ArrowResource {
 
   @override
   bool matchesShape(ArrowResource shape) {
-    if (shape is ArrowString) return shape.str == "number";
+    if (shape is ArrowString) return shape.str == "number" || shape.str == "any";
     return false;
   }
 }

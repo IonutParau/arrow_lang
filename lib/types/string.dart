@@ -197,7 +197,7 @@ class ArrowString extends ArrowResource {
 
   @override
   bool matchesShape(ArrowResource shape) {
-    if (shape is ArrowString) return shape.str == "string";
+    if (shape is ArrowString) return shape.str == "string" || shape.str == "any";
     return false;
   }
 }

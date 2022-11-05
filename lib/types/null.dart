@@ -95,7 +95,7 @@ class ArrowNull extends ArrowResource {
 
   @override
   bool matchesShape(ArrowResource shape) {
-    if (shape is ArrowString) return shape.str == "null";
+    if (shape is ArrowString) return shape.str == "null" || shape.str == "any";
     return false;
   }
 }

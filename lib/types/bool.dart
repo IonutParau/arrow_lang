@@ -103,7 +103,7 @@ class ArrowBool extends ArrowResource {
   @override
   bool matchesShape(ArrowResource shape) {
     if (shape is ArrowString) {
-      return shape.str == "bool";
+      return shape.str == "bool" || shape.str == "any";
     }
     return false;
   }

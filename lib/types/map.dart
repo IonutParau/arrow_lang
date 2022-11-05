@@ -163,7 +163,7 @@ class ArrowMap extends ArrowResource {
     }
 
     if (shape is ArrowString) {
-      return shape.str == type;
+      return shape.str == type || shape.str == "any";
     }
 
     return false;
