@@ -78,6 +78,7 @@ class ArrowLocals {
         stack.removeAt(i);
         return true;
       }
+      i--;
     }
 
     return false;

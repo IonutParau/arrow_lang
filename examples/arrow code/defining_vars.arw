@@ -1,5 +1,0 @@
-let name = 5
-
-function localFunction(param1, param2) {}
-
-global test = 5

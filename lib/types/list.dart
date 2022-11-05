@@ -71,6 +71,7 @@ class ArrowList extends ArrowResource {
     }
     if (field == "pop") {
       return ArrowExternalFunction((params, stackTrace) {
+        if (elements.isEmpty) return ArrowNull();
         return elements.removeLast();
       });
     }
@@ -166,6 +167,23 @@ class ArrowList extends ArrowResource {
     }
     if (field == "copy") {
       return ArrowList([...elements]);
+    }
+    if (field == "sublist") {
+      return ArrowExternalFunction((params, stackTrace) {
+        var p1 = params[0];
+        var p2 = params[1];
+        if (p2.type == "null") {
+          p2 = ArrowNumber(elements.length);
+        }
+        if (p1 is ArrowNumber && p2 is ArrowNumber) {
+          final start = p1.number.toInt();
+          final end = p2.number.toInt();
+
+          return ArrowList(elements.sublist(start, end));
+        }
+
+        return ArrowNull();
+      }, 2);
     }
 
     return ArrowNull();

@@ -34,6 +34,7 @@ class ArrowFunction extends ArrowResource {
     final returned = locals.getByName("");
 
     locals.removeAmount(locals.size - size);
+    //if (returned != null) locals.removeByName("");
 
     return returned ?? ArrowNull();
   }

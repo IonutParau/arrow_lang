@@ -90,6 +90,7 @@ class ArrowLibs {
     addLib("math", loadMath);
     addLib("map", loadObject);
     addLib("helper", loadHelper);
+    addLib("memory", loadMemory);
     addLib("fs", loadFS);
   }
 
@@ -99,6 +100,133 @@ class ArrowLibs {
         map[lib]!(vm.globals._globals);
       }
     }
+  }
+
+  void loadMemory(ArrowLibMap map) {
+    vm.run(r'''
+Memory = {}
+
+class Memory.Buffer(contents, strict) {
+  this.contents = contents
+  this.strict = strict
+  this.start = 0
+  this.size = contents.length
+
+  fn this.inside(i) {
+    return (i >= 0 && i < this.size)
+  }
+
+  fn this.set(i, v) {
+    if(this.strict) {
+      if(this.inside(i) == false) {
+        return
+      }
+    }
+    this.contents[i + this.start] = v
+  }
+
+  fn this.get(i) {
+    if(this.strict) {
+      if(this.inside(i) == false) {
+        return null
+      }
+    }
+    return this.contents[i + this.start]
+  }
+
+  fn this.move(amount) {
+    this.start += amount
+  }
+
+  fn this.resize(size) {
+    this.size = size
+  }
+
+  fn this.subbuffer(start, end) {
+    let buff = Memory.Buffer(this.contents, this.strict)
+    buff.move(start)
+    buff.resize(end - start + 1)
+    return buff
+  }
+
+  fn this.list() {
+    let l = []
+    let i = 0
+    while(i < this.size) {
+      l.push(this.get(i))
+      i += 1
+    }
+    return l
+  }
+
+  fn this.contains(e) {
+    let i = 0
+    while(i < this.size) {
+      if(this.get(i) == e) {
+        return true
+      }
+      i += 1
+    }
+    return false
+  }
+}
+
+class Memory.Pool(create, reset, delete, limit) {
+  this.limit = limit
+  this.reserves = []
+
+  fn this.needs(amount) {
+    while(this.reserves.length < amount) {
+      this.reserves.push(create())
+    }
+  }
+
+  fn this.take() {
+    let taken = this.reserves.pop()
+    reset(taken)
+    return taken
+  }
+
+  fn this.new() {
+    this.needs(1)
+    return this.take()
+  }
+
+  fn this.cleanup() {
+    while(this.reserves.length > amount) {
+      this.reserves.pop()
+    }
+  }
+
+  fn this.free(o) {
+    this.reserves.push(o)
+  }
+
+  fn this.scoped(toRun) {
+    let o = this.new()
+    toRun(o)
+    this.free(o)
+  }
+
+  fn this.multiscoped(toRun, amount) {
+    this.needs(amount)
+    let e = []
+    let i = 0
+    while(i < amount) {
+      i += 1
+      e.push(this.new())
+    }
+
+    toRun(e)
+
+    i = 0
+    while(i < amount) {
+      i += 1
+      this.free(e.pop())
+    }
+  }
+}
+''', 'arrow:memory');
   }
 
   void loadFS(ArrowLibMap map) {
@@ -736,7 +864,7 @@ class ArrowVM {
     return run(file.readAsStringSync(), file.path);
   }
 
-  void loadLibs([List<String> libs = const ["terminal", "fs", "math", "internal", "map", "helper"]]) {
+  void loadLibs([List<String> libs = const ["terminal", "fs", "math", "internal", "map", "helper", "memory"]]) {
     this.libs.load(libs);
   }
 }
