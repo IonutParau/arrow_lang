@@ -112,6 +112,19 @@ class ArrowFunction extends ArrowResource {
 
   @override
   String get type => "function";
+
+  @override
+  bool approximatelyEquals(ArrowResource other) {
+    return other is ArrowFunction || other is ArrowExternalFunction;
+  }
+
+  @override
+  bool matchesShape(ArrowResource shape) {
+    if (shape is ArrowString) {
+      return shape.str == "function";
+    }
+    return false;
+  }
 }
 
 class ArrowExternalFunction extends ArrowResource {
@@ -208,4 +221,17 @@ class ArrowExternalFunction extends ArrowResource {
 
   @override
   String get type => "function";
+
+  @override
+  bool approximatelyEquals(ArrowResource other) {
+    return other is ArrowFunction || other is ArrowExternalFunction;
+  }
+
+  @override
+  bool matchesShape(ArrowResource shape) {
+    if (shape is ArrowString) {
+      return shape.str == "function";
+    }
+    return false;
+  }
 }

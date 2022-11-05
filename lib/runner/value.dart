@@ -18,6 +18,8 @@ abstract class ArrowResource {
   bool less(ArrowResource other);
   bool greaterEqual(ArrowResource other);
   bool lessEqual(ArrowResource other);
+  bool approximatelyEquals(ArrowResource other);
+  bool matchesShape(ArrowResource shape);
 
   bool get truthy;
 

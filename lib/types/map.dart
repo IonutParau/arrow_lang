@@ -125,4 +125,47 @@ class ArrowMap extends ArrowResource {
 
   @override
   String get type => map["__type"] == null ? "map" : map["__type"]!.string;
+
+  @override
+  bool approximatelyEquals(ArrowResource other) {
+    if (other is ArrowMap) {
+      bool failed = false;
+      other.map.forEach(
+        (key, value) {
+          if (!map.containsKey(key)) {
+            failed = true;
+            return;
+          }
+
+          if (!map[key]!.approximatelyEquals(value)) {
+            failed = true;
+            return;
+          }
+        },
+      );
+      return !failed;
+    }
+
+    return false;
+  }
+
+  @override
+  bool matchesShape(ArrowResource shape) {
+    if (shape is ArrowMap) {
+      bool failed = false;
+      shape.map.forEach((key, value) {
+        final mv = map[key] ?? ArrowNull();
+
+        if (!mv.matchesShape(shape.map[key] ?? ArrowNull())) failed = true;
+      });
+
+      return !failed;
+    }
+
+    if (shape is ArrowString) {
+      return shape.str == type;
+    }
+
+    return false;
+  }
 }

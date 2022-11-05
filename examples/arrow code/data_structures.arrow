@@ -1,0 +1,69 @@
+class LinkedList(val) {
+  this.val = val;
+  this.used = (val != null);
+  fn this.get(i) {
+    if(i == 0) {
+      return this.val;
+    }
+    if(this.next == null) {
+      return null;
+    }
+    this.next.get(i - 1);
+  }
+  fn this.set(i, val) {
+    if(i == 0) {
+      this.val = val;
+      this.used = true;
+    }
+    if(this.next != null) {
+      this.next.set(i - 1, val);
+    }
+  }
+  fn this.add(val) {
+    if(this.used == false) {
+      this.used = true;
+      this.val = val;
+      return;
+    }
+    if(this.next == null) {
+      this.next = LinkedList(val);
+      return;
+    }
+    this.next.add(val);
+  }
+  fn this.len() {
+    if(this.used == false) {
+      return 0;
+    }
+    if(this.next != null) {
+      return (1 + this.next.len());
+    }
+    return 1;
+  }
+}
+
+class BinaryTree(val) {
+  this.val = val;
+  this.used = (val != null);
+
+  fn this.insert(val) {
+    if(this.used == false) {
+      this.val = val;
+      return;
+    }
+
+    if(val > this.val) {
+      if(this.left == null) {
+        this.left = BinaryTree(val);
+      } else {
+        this.left.insert(val);
+      }
+    } else {
+      if(this.right == null) {
+        this.right = BinaryTree(val);
+      } else {
+        this.right.insert(val);
+      }
+    }
+  }
+}

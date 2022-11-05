@@ -94,4 +94,17 @@ class ArrowBool extends ArrowResource {
     stackTrace.crash(ArrowStackTraceElement("Attempt to perform arithmetic on a bool.", file, line));
     return this;
   }
+
+  @override
+  bool approximatelyEquals(ArrowResource other) {
+    return equals(other);
+  }
+
+  @override
+  bool matchesShape(ArrowResource shape) {
+    if (shape is ArrowString) {
+      return shape.str == "bool";
+    }
+    return false;
+  }
 }

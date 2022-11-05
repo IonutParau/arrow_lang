@@ -82,7 +82,7 @@ class ArrowList extends ArrowResource {
             final i = other.number.toInt();
 
             if (i >= 0 && i < elements.length) {
-              return elements[i];
+              return elements.removeAt(i);
             }
           }
         }
@@ -249,4 +249,39 @@ class ArrowList extends ArrowResource {
 
   @override
   String get type => "list";
+
+  @override
+  bool approximatelyEquals(ArrowResource other) {
+    if (other is ArrowList) {
+      if (other.elements.length == elements.length) {
+        for (var i = 0; i < elements.length; i++) {
+          if (!elements[i].approximatelyEquals(other.elements[i])) return false;
+        }
+        return true;
+      }
+      return false;
+    }
+
+    return false;
+  }
+
+  @override
+  bool matchesShape(ArrowResource shape) {
+    if (shape is ArrowList) {
+      if (elements.length >= shape.elements.length) {
+        for (var i = 0; i < shape.elements.length; i++) {
+          if (!elements[i].matchesShape(shape.elements[i])) return false;
+        }
+
+        return true;
+      }
+      return false;
+    }
+
+    if (shape is ArrowString) {
+      return shape.str == "list";
+    }
+
+    return false;
+  }
 }

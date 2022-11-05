@@ -2,7 +2,7 @@ part of arrow_runner;
 
 const int arrowStackTraceLimit = 50;
 const int arrowStackOverflowLimit = 500;
-const String arrowVersion = "0.0.1";
+const String arrowVersion = "0.1.0";
 
 final rng = Random();
 
@@ -211,6 +211,10 @@ class ArrowLibs {
       }
       throw ArrowStackTraceElement("Assertion Failed", "arrow:helper", 0);
     }, 1);
+
+    map["isShape"] = ArrowExternalFunction((params, stackTrace) {
+      return ArrowBool(params[0].matchesShape(params[1]));
+    }, 2);
   }
 
   void loadObject(ArrowLibMap map) {
@@ -721,7 +725,7 @@ class ArrowVM {
   ArrowResource run(String code, String fileName) {
     final codeSegs = parser.splitCode(code, fileName, 0);
 
-    final codeTokens = codeSegs.map((e) => parser.parseSegments(parser.splitLine(e.content, e.file, e.line), true)).toList();
+    final codeTokens = codeSegs.map((e) => parser.parseSegments(parser.splitLine(e.content, e.file, e.line), ArrowScopeType.code)).toList();
 
     final rootBlock = ArrowBlockToken(codeTokens, this, fileName, -1).optimized;
 

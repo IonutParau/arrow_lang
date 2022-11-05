@@ -16,6 +16,12 @@ abstract class ArrowToken {
   String get name;
 }
 
+enum ArrowScopeType {
+  code,
+  data,
+  shape,
+}
+
 class ArrowConstValToken extends ArrowToken {
   ArrowResource res;
 
@@ -252,37 +258,37 @@ class ArrowParser {
     return s;
   }
 
-  ArrowToken parseSegments(List<ArrowParsedSegment> segs, bool topLevel) {
+  ArrowToken parseSegments(List<ArrowParsedSegment> segs, ArrowScopeType scopeType) {
     if (segs.length == 1) {
       final seg = segs.first;
       final file = seg.file;
       final line = seg.line;
 
       if (seg.content.startsWith('!')) {
-        final val = parseSegments(splitLine(seg.content.substring(1), file, line), false);
+        final val = parseSegments(splitLine(seg.content.substring(1), file, line), ArrowScopeType.data);
         return ArrowNotToken(val, vm, file, line);
       }
 
       if (seg.content.startsWith('-')) {
-        final val = parseSegments(splitLine(seg.content.substring(1), file, line), false);
+        final val = parseSegments(splitLine(seg.content.substring(1), file, line), ArrowScopeType.data);
         return ArrowSubtractionToken(ArrowNumberToken(0, vm, file, line), val, vm, file, line);
       }
 
       if (seg.content.startsWith('(') && seg.content.endsWith(')')) {
         final content = seg.content.substring(1, seg.content.length - 1);
-        return parseSegments(splitLine(content, file, line), false);
+        return parseSegments(splitLine(content, file, line), ArrowScopeType.data);
       }
 
       if (seg.content.contains('(') && seg.content.endsWith(')')) {
         final i = lastIndex(seg.content, file, line, ['(']);
-        final toCall = parseSegments(splitLine(seg.content.substring(0, i), file, line), false);
+        final toCall = parseSegments(splitLine(seg.content.substring(0, i), file, line), ArrowScopeType.data);
         final content = seg.content.substring(i + 1, seg.content.length - 1);
 
         if (content == "") {
           return ArrowCallToken([], toCall, vm, file, line);
         }
 
-        final paramsTokens = splitToSegs(content, file, line, [',']).map((e) => parseSegments(splitLine(e.content, e.file, e.line), false)).toList();
+        final paramsTokens = splitToSegs(content, file, line, [',']).map((e) => parseSegments(splitLine(e.content, e.file, e.line), ArrowScopeType.data)).toList();
 
         return ArrowCallToken(paramsTokens, toCall, vm, file, line);
       }
@@ -315,39 +321,39 @@ class ArrowParser {
         final contents = seg.content.substring(1, seg.content.length - 1);
         final contentSegs = splitToSegs(contents, file, line, [',']);
 
-        final elements = contentSegs.map((e) => parseSegments(splitLine(e.content, e.file, e.line), false)).toList();
+        final elements = contentSegs.map((e) => parseSegments(splitLine(e.content, e.file, e.line), ArrowScopeType.data)).toList();
 
         return ArrowListToken(elements, vm, file, line);
       }
 
       if (seg.content.contains('[') && seg.content.endsWith(']')) {
         final i = lastIndex(seg.content, file, line, ['[']);
-        final host = parseSegments(splitLine(seg.content.substring(0, i), file, line), false);
+        final host = parseSegments(splitLine(seg.content.substring(0, i), file, line), ArrowScopeType.data);
         final field = seg.content.substring(i + 1, seg.content.length - 1);
 
         if (field == "") {
           return ArrowFieldToken(ArrowNullToken(vm, file, line), host, vm, file, line);
         }
 
-        final fieldToken = parseSegments(splitLine(field, file, line), false);
+        final fieldToken = parseSegments(splitLine(field, file, line), ArrowScopeType.data);
 
         return ArrowFieldToken(fieldToken, host, vm, file, line);
       }
 
       if (seg.content.startsWith('{') && seg.content.endsWith('}')) {
-        if (topLevel) {
+        if (scopeType == ArrowScopeType.code) {
           final code = splitCode(seg.content.substring(1, seg.content.length - 1), file, line);
 
           return ArrowBlockToken(
             code.map((e) {
-              final s = parseSegments(splitLine(e.content, e.file, e.line), true);
+              final s = parseSegments(splitLine(e.content, e.file, e.line), ArrowScopeType.code);
               return s;
             }).toList(),
             vm,
             file,
             line,
           );
-        } else {
+        } else if (scopeType == ArrowScopeType.data) {
           final contents = seg.content.substring(1, seg.content.length - 1);
           if (contents.replaceAll('\n', '').replaceAll('\t', '').replaceAll(' ', '') == "") {
             return ArrowMapToken({}, vm, file, line);
@@ -379,15 +385,46 @@ class ArrowParser {
             final value = l[2];
 
             if (key.content.startsWith('(') && key.content.endsWith(')')) {
-              map[parseSegments(splitLine(key.content.substring(1, key.content.length - 1), key.file, key.line), false)] = parseSegments(splitLine(value.content, value.file, value.line), false);
+              map[parseSegments(splitLine(key.content.substring(1, key.content.length - 1), key.file, key.line), ArrowScopeType.data)] =
+                  parseSegments(splitLine(value.content, value.file, value.line), ArrowScopeType.data);
             } else {
               if (!isValidFieldName(key.content)) {
                 throw ArrowParsingFailure("Forbidden field name. Either replace the field name witha raw expression (by wrapping it in parentheses) or make it like a variable name", file, line);
               }
-              map[ArrowStringToken(key.content, vm, key.file, key.line)] = parseSegments(splitLine(value.content, value.file, value.line), false);
+              map[ArrowStringToken(key.content, vm, key.file, key.line)] = parseSegments(splitLine(value.content, value.file, value.line), ArrowScopeType.data);
             }
           }
           return ArrowMapToken(map, vm, file, line);
+        } else if (scopeType == ArrowScopeType.shape) {
+          final contents = seg.content.substring(1, seg.content.length - 1);
+          final segs = splitToSegs(contents, file, line, [',']);
+
+          final m = <String, ArrowToken>{};
+
+          for (var seg in segs) {
+            final subsegs = splitLine(seg.content, seg.file, seg.line);
+
+            if (subsegs.length == 1) {
+              if (isValidFieldName(subsegs.first.content)) {
+                m[subsegs.first.content] = ArrowStringToken("any", vm, subsegs.first.file, subsegs.first.line);
+                continue;
+              }
+            }
+            if (subsegs.length == 2) {
+              final name = subsegs.first;
+              final val = subsegs[1];
+              if (name.content.endsWith(':') && isValidFieldName(name.content.substring(0, name.content.length - 1))) {
+                if (val.content.startsWith('{') && val.content.endsWith('}')) m[subsegs.first.content.substring(0, name.content.length - 1)] = parseSegments([val], ArrowScopeType.shape);
+                if (isValidVariableName(val.content)) {
+                  m[subsegs.first.content.substring(0, name.content.length - 1)] = ArrowStringToken(val.content, vm, val.file, val.line);
+                }
+                continue;
+              }
+            }
+            throw ArrowParsingFailure("Unknown Scope Field Syntax", seg.file, seg.line);
+          }
+
+          return ArrowShapeBody(m, vm, file, line);
         }
       }
 
@@ -405,7 +442,7 @@ class ArrowParser {
           throw ArrowParsingFailure("Forbidden field name", file, line);
         }
 
-        return ArrowFieldToken(ArrowStringToken(field.content, vm, file, line), parseSegments(splitLine(host, file, line), false), vm, file, line);
+        return ArrowFieldToken(ArrowStringToken(field.content, vm, file, line), parseSegments(splitLine(host, file, line), ArrowScopeType.data), vm, file, line);
       }
     } else {
       if (segs.length == 3) {
@@ -423,8 +460,8 @@ class ArrowParser {
             }
           }
 
-          final varname = parseSegments(splitLine(name, segs[2].file, segs[2].line), false);
-          final body = parseSegments([segs[2]], true);
+          final varname = parseSegments(splitLine(name, segs[2].file, segs[2].line), ArrowScopeType.data);
+          final body = parseSegments([segs[2]], ArrowScopeType.code);
 
           return ArrowDefineFunctionToken(varname, params, body, vm, segs[0].file, segs[0].line);
         }
@@ -432,7 +469,7 @@ class ArrowParser {
 
       if (segs.length > 1) {
         if (segs[0].content == "return") {
-          final body = parseSegments(segs.sublist(1), false);
+          final body = parseSegments(segs.sublist(1), ArrowScopeType.data);
           return ArrowReturnToken(body, vm, segs[0].file, segs[0].line);
         }
       }
@@ -445,8 +482,8 @@ class ArrowParser {
 
       if (segs.length == 4) {
         if (segs[0].content == "export" && segs[2].content == "as") {
-          final val = parseSegments([segs[1]], false);
-          final key = parseSegments([segs[3]], false);
+          final val = parseSegments([segs[1]], ArrowScopeType.data);
+          final key = parseSegments([segs[3]], ArrowScopeType.data);
 
           return ArrowExportToken(val, key, vm, segs[0].file, segs[0].line);
         }
@@ -462,7 +499,7 @@ class ArrowParser {
           }
           if (segs.length > 3) {
             if (segs[2].content == "=") {
-              return ArrowGlobalToken(name, parseSegments(segs.sublist(3), false), vm, segs[0].file, segs[0].line);
+              return ArrowGlobalToken(name, parseSegments(segs.sublist(3), ArrowScopeType.data), vm, segs[0].file, segs[0].line);
             }
           }
         }
@@ -483,10 +520,10 @@ class ArrowParser {
             }
           }
 
-          final varname = parseSegments(splitLine(name, segs[1].file, segs[1].line), false);
+          final varname = parseSegments(splitLine(name, segs[1].file, segs[1].line), ArrowScopeType.data);
           if (segs[2].content == "extends" && segs.length >= 5) {
-            final toInherit = parseSegments([segs[3]], false);
-            final body = parseSegments(segs.sublist(4), true);
+            final toInherit = parseSegments([segs[3]], ArrowScopeType.data);
+            final body = parseSegments(segs.sublist(4), ArrowScopeType.code);
 
             return ArrowClassToken(
                 varname,
@@ -506,9 +543,17 @@ class ArrowParser {
                 segs[0].line);
           }
 
-          final body = parseSegments(segs.sublist(2), true);
+          final body = parseSegments(segs.sublist(2), ArrowScopeType.code);
 
           return ArrowClassToken(varname, params, body, vm, segs[0].file, segs[0].line);
+        }
+      }
+
+      if (segs.length == 3) {
+        if (segs[0].content == "shape") {
+          final name = parseSegments([segs[1]], ArrowScopeType.data);
+          final body = parseSegments([segs[2]], ArrowScopeType.shape);
+          return ArrowShapeToken(name, body, vm, segs.first.file, segs.first.line);
         }
       }
 
@@ -523,7 +568,7 @@ class ArrowParser {
 
           if (segs.length > 3) {
             if (segs[2].content == "=") {
-              final value = parseSegments(segs.sublist(3), false);
+              final value = parseSegments(segs.sublist(3), ArrowScopeType.data);
 
               return ArrowLetToken(varname, value, vm, segs[0].file, segs[0].line);
             }
@@ -533,38 +578,38 @@ class ArrowParser {
 
       if (segs.length > 2) {
         if (segs[1].content == "=") {
-          final varname = parseSegments([segs[0]], false);
-          final value = parseSegments(segs.sublist(2), false);
+          final varname = parseSegments([segs[0]], ArrowScopeType.data);
+          final value = parseSegments(segs.sublist(2), ArrowScopeType.data);
           return ArrowSetToken(varname, value, vm, segs[0].file, segs[0].line);
         }
         if (segs[1].content == "+=") {
-          final varname = parseSegments([segs[0]], false);
-          final value = parseSegments(segs.sublist(2), false);
+          final varname = parseSegments([segs[0]], ArrowScopeType.data);
+          final value = parseSegments(segs.sublist(2), ArrowScopeType.data);
           return ArrowSetToken(varname, ArrowAdditionToken(varname, value, vm, segs[0].file, segs[0].line), vm, segs[0].file, segs[0].line);
         }
         if (segs[1].content == "-=") {
-          final varname = parseSegments([segs[0]], false);
-          final value = parseSegments(segs.sublist(2), false);
+          final varname = parseSegments([segs[0]], ArrowScopeType.data);
+          final value = parseSegments(segs.sublist(2), ArrowScopeType.data);
           return ArrowSetToken(varname, ArrowSubtractionToken(varname, value, vm, segs[0].file, segs[0].line), vm, segs[0].file, segs[0].line);
         }
         if (segs[1].content == "*=") {
-          final varname = parseSegments([segs[0]], false);
-          final value = parseSegments(segs.sublist(2), false);
+          final varname = parseSegments([segs[0]], ArrowScopeType.data);
+          final value = parseSegments(segs.sublist(2), ArrowScopeType.data);
           return ArrowSetToken(varname, ArrowMultiplyToken(varname, value, vm, segs[0].file, segs[0].line), vm, segs[0].file, segs[0].line);
         }
         if (segs[1].content == "/=") {
-          final varname = parseSegments([segs[0]], false);
-          final value = parseSegments(segs.sublist(2), false);
+          final varname = parseSegments([segs[0]], ArrowScopeType.data);
+          final value = parseSegments(segs.sublist(2), ArrowScopeType.data);
           return ArrowSetToken(varname, ArrowDivideToken(varname, value, vm, segs[0].file, segs[0].line), vm, segs[0].file, segs[0].line);
         }
         if (segs[1].content == "%=") {
-          final varname = parseSegments([segs[0]], false);
-          final value = parseSegments(segs.sublist(2), false);
+          final varname = parseSegments([segs[0]], ArrowScopeType.data);
+          final value = parseSegments(segs.sublist(2), ArrowScopeType.data);
           return ArrowSetToken(varname, ArrowModToken(varname, value, vm, segs[0].file, segs[0].line), vm, segs[0].file, segs[0].line);
         }
         if (segs[1].content == "^=") {
-          final varname = parseSegments([segs[0]], false);
-          final value = parseSegments(segs.sublist(2), false);
+          final varname = parseSegments([segs[0]], ArrowScopeType.data);
+          final value = parseSegments(segs.sublist(2), ArrowScopeType.data);
           return ArrowSetToken(varname, ArrowExpToken(varname, value, vm, segs[0].file, segs[0].line), vm, segs[0].file, segs[0].line);
         }
       }
@@ -574,9 +619,9 @@ class ArrowParser {
           final i = segs[0].content.indexOf('(');
           final name = segs[0].content.substring(i + 1, segs[0].content.length - 1);
 
-          final condition = parseSegments(splitLine(name, segs[0].file, segs[0].line), false);
+          final condition = parseSegments(splitLine(name, segs[0].file, segs[0].line), ArrowScopeType.data);
 
-          final body = parseSegments([segs[1]], true);
+          final body = parseSegments([segs[1]], ArrowScopeType.code);
 
           return ArrowIfToken(condition, body, vm, segs[0].file, segs[0].line);
         }
@@ -587,9 +632,9 @@ class ArrowParser {
           final i = segs[0].content.indexOf('(');
           final name = segs[0].content.substring(i + 1, segs[0].content.length - 1);
 
-          final condition = parseSegments(splitLine(name, segs[0].file, segs[0].line), false);
+          final condition = parseSegments(splitLine(name, segs[0].file, segs[0].line), ArrowScopeType.data);
 
-          final body = parseSegments(segs.sublist(1), true);
+          final body = parseSegments(segs.sublist(1), ArrowScopeType.code);
 
           return ArrowWhileToken(condition, body, vm, segs[0].file, segs[0].line);
         }
@@ -598,7 +643,7 @@ class ArrowParser {
           final name = segs[0].content.substring(4, segs[0].content.length - 1);
 
           final nameSegs = splitLine(name, segs[0].file, segs[0].line);
-          final body = parseSegments(segs.sublist(1), true);
+          final body = parseSegments(segs.sublist(1), ArrowScopeType.code);
 
           if (nameSegs.length == 3 || nameSegs.length == 5) {
             if (nameSegs.length == 3 && nameSegs[1].content == "in") {
@@ -606,7 +651,7 @@ class ArrowParser {
 
               if (!isValidVariableName(varname)) throw ArrowParsingFailure("Invalid variable name for value store", nameSegs[0].file, nameSegs[0].line);
 
-              return ArrowForToken(varname, parseSegments([nameSegs[2]], false), body, vm, segs[0].file, segs[0].line);
+              return ArrowForToken(varname, parseSegments([nameSegs[2]], ArrowScopeType.data), body, vm, segs[0].file, segs[0].line);
             }
             if (nameSegs.length == 5 && nameSegs[1].content == "at" && nameSegs[3].content == "in") {
               final varname = nameSegs[0].content;
@@ -615,7 +660,7 @@ class ArrowParser {
               if (!isValidVariableName(varname)) throw ArrowParsingFailure("Invalid variable name for value store", nameSegs[0].file, nameSegs[0].line);
               if (!isValidVariableName(atname)) throw ArrowParsingFailure("Invalid variable name for index store", nameSegs[2].file, nameSegs[2].line);
 
-              return ArrowForAtToken(varname, atname, parseSegments([nameSegs[4]], false), body, vm, segs[0].file, segs[0].line);
+              return ArrowForAtToken(varname, atname, parseSegments([nameSegs[4]], ArrowScopeType.data), body, vm, segs[0].file, segs[0].line);
             }
           }
         }
@@ -626,11 +671,11 @@ class ArrowParser {
           final i = segs[0].content.indexOf('(');
           final name = segs[0].content.substring(i + 1, segs[0].content.length - 1);
 
-          final condition = parseSegments(splitLine(name, segs[0].file, segs[0].line), false);
+          final condition = parseSegments(splitLine(name, segs[0].file, segs[0].line), ArrowScopeType.data);
 
-          final body = parseSegments([segs[1]], true);
+          final body = parseSegments([segs[1]], ArrowScopeType.code);
 
-          final fallback = parseSegments(segs.sublist(3), true);
+          final fallback = parseSegments(segs.sublist(3), ArrowScopeType.code);
 
           return ArrowIfElseToken(condition, body, fallback, vm, segs[0].file, segs[0].line);
         }
@@ -667,8 +712,8 @@ class ArrowParser {
                   if (ri >= parts.length) {
                     throw ArrowParsingFailure("Nothing on the right of the ${op.content} operator!", op.file, op.line);
                   }
-                  final l = parts[li] is ArrowToken ? parts[li] as ArrowToken : parseSegments([parts[li]], false);
-                  final r = parts[ri] is ArrowToken ? parts[ri] as ArrowToken : parseSegments([parts[ri]], false);
+                  final l = parts[li] is ArrowToken ? parts[li] as ArrowToken : parseSegments([parts[li]], ArrowScopeType.data);
+                  final r = parts[ri] is ArrowToken ? parts[ri] as ArrowToken : parseSegments([parts[ri]], ArrowScopeType.data);
                   if (op.content == "^") {
                     parts[li] = ArrowExpToken(l, r, vm, op.file, op.line);
                     parts.removeAt(i);

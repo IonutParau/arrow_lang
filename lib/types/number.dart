@@ -194,4 +194,15 @@ class ArrowNumber extends ArrowResource {
     stackTrace.crash(ArrowStackTraceElement("Attempt to raise number to power of ${other.type}.", file, line));
     return this;
   }
+
+  @override
+  bool approximatelyEquals(ArrowResource other) {
+    return other is ArrowNumber;
+  }
+
+  @override
+  bool matchesShape(ArrowResource shape) {
+    if (shape is ArrowString) return shape.str == "number";
+    return false;
+  }
 }

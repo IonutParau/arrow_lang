@@ -87,4 +87,15 @@ class ArrowNull extends ArrowResource {
     stackTrace.crash(ArrowStackTraceElement("Attempt to perform arithmetic on null", file, line));
     return this;
   }
+
+  @override
+  bool approximatelyEquals(ArrowResource other) {
+    return other is ArrowNull;
+  }
+
+  @override
+  bool matchesShape(ArrowResource shape) {
+    if (shape is ArrowString) return shape.str == "null";
+    return false;
+  }
 }

@@ -15,6 +15,7 @@ part 'values/map.dart';
 part 'values/list.dart';
 part 'values/function.dart';
 part 'values/class.dart';
+part 'values/shape.dart';
 
 // Syntax for field manipulation, variable manipulation and function invocation
 part 'uses/call.dart';

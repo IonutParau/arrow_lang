@@ -1,0 +1,45 @@
+// isShape is like a fancy type checker. If given a string, it'll check for type matches. (supports __type in the case of it beign given class instances)
+print(isShape(5, "number"))
+// Prints true
+
+
+
+// However, we can also be more restrictive. We can give it a map or list, as a shape.
+print(isShape({test = "something"}, {test = "number"}))
+// Prints false
+
+
+
+// Manually writing types can be hard, so we have the shape keyword for syntactic sugar
+shape TestShape {
+  test: number,
+  other: {
+    thing: map,
+    something: list
+  }
+}
+
+// The above code is equivalent to
+let TestShape = {
+  test = "number",
+  other = {
+    thing = "map",
+    something = "list"
+  }
+}
+
+// It also handles classes
+class SomeClass {
+  this.field1 = "Test"
+}
+
+print(isShape(SomeClass(), "SomeClass"))
+// Prints true
+
+// But what about lists? What if they need a specific shape?
+// isShape also handles lists. Their length has to match, but also the shapes of the internal elements as well!
+print(isShape([50, "test", true], ["number", "string", "bool"]))
+// Prints true, yet
+print(isShape([50], ["number", "number"]))
+// does not, and neither does
+print(isShape([50, 20], ["number"]))
