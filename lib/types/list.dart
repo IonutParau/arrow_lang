@@ -286,7 +286,7 @@ class ArrowList extends ArrowResource {
   @override
   bool matchesShape(ArrowResource shape) {
     if (shape is ArrowList) {
-      if (elements.length >= shape.elements.length) {
+      if (elements.length == shape.elements.length) {
         for (var i = 0; i < shape.elements.length; i++) {
           if (!elements[i].matchesShape(shape.elements[i])) return false;
         }

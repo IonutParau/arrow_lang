@@ -14,7 +14,7 @@ class ArrowNumberToken extends ArrowToken {
   }
 
   @override
-  String get name => "number($n)";
+  String get name => "$n";
 
   @override
   void set(ArrowLocals locals, ArrowGlobals globals, ArrowStackTrace stackTrace, ArrowResource other) {

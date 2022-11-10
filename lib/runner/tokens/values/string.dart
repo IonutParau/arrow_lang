@@ -57,7 +57,7 @@ class ArrowStringToken extends ArrowToken {
   }
 
   @override
-  String get name => "string(\"$str\")";
+  String get name => str;
 
   @override
   void set(ArrowLocals locals, ArrowGlobals globals, ArrowStackTrace stackTrace, ArrowResource other) {

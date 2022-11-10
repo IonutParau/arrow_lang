@@ -415,7 +415,7 @@ class ArrowParser {
               final val = subsegs[1];
               if (name.content.endsWith(':') && isValidFieldName(name.content.substring(0, name.content.length - 1))) {
                 if (val.content.startsWith('{') && val.content.endsWith('}')) m[subsegs.first.content.substring(0, name.content.length - 1)] = parseSegments([val], ArrowScopeType.shape);
-                if (isValidVariableName(val.content)) {
+                if (isValidTypeName(val.content)) {
                   m[subsegs.first.content.substring(0, name.content.length - 1)] = ArrowStringToken(val.content, vm, val.file, val.line);
                 }
                 continue;
@@ -834,6 +834,10 @@ class ArrowParser {
   }
 
   List<String> variableAlphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_".split("");
+
+  bool isValidTypeName(String name) {
+    return name.split('.').fold(false, (current, element) => current || isValidFieldName(element));
+  }
 
   bool isValidVariableName(String name) {
     final chars = name.split("");

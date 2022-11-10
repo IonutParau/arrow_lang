@@ -41,6 +41,9 @@ class ArrowGlobals {
   void set(String name, ArrowResource resource) {
     _globals[name] = resource;
   }
+
+  @override
+  String toString() => _globals.toString();
 }
 
 class ArrowVariable {

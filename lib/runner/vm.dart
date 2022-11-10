@@ -504,7 +504,10 @@ class Memory.Pool(create, reset, delete, limit) {
 
     math["maxfloat"] = ArrowNumber(double.maxFinite);
 
-    math["maxint"] = ArrowNumber(9223372036854775807);
+    int bitness = bool.fromEnvironment('dart.library.js') ? 52 : 64;
+    int max = (((1 << (bitness - 2)) - 1) << 1) + 1;
+
+    math["maxint"] = ArrowNumber(max);
 
     math["pi"] = ArrowNumber(pi);
     math["e"] = ArrowNumber(e);
@@ -690,7 +693,7 @@ class Memory.Pool(create, reset, delete, limit) {
         return ArrowNull();
       }
       if (params[0] is ArrowString) {
-        final p = params[0].string.split("/").join(Platform.pathSeparator);
+        final p = params[0].string.split("/").join(path.separator);
         var file = File(p);
         if (!file.existsSync()) {
           file = File('$p.arw');
@@ -790,14 +793,6 @@ class Memory.Pool(create, reset, delete, limit) {
 
       return ArrowString(type);
     }), 1);
-
-    map["OS"] = ArrowString(Platform.operatingSystem);
-
-    map["OS_VER"] = ArrowString(Platform.operatingSystemVersion);
-
-    map["CORES"] = ArrowNumber(Platform.numberOfProcessors);
-
-    map["PATH_SEP"] = ArrowString(Platform.pathSeparator);
 
     map["ARROW_VER"] = ArrowString(arrowVersion);
   }

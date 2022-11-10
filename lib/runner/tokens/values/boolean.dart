@@ -14,7 +14,7 @@ class ArrowBoolToken extends ArrowToken {
   }
 
   @override
-  String get name => "bool($boolean)";
+  String get name => boolean ? "true" : "false";
 
   @override
   void set(ArrowLocals locals, ArrowGlobals globals, ArrowStackTrace stackTrace, ArrowResource other) {
